@@ -149,7 +149,7 @@ public:
     void operator()(const osmium::Way&, osmium::memory::Buffer&) {
     }
 
-    void operator()(const osmium::Relation&, const std::vector<size_t>&, const osmium::memory::Buffer&, osmium::memory::Buffer&) {
+    void operator()(const osmium::Relation&, const std::vector<const osmium::Way*>&, osmium::memory::Buffer&) {
     }
 
     const osmium::area::area_stats& stats() const noexcept {
