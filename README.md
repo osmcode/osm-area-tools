@@ -54,6 +54,11 @@ Look at the largest area relations in the input OSM file in terms of the number
 of ways or nodes they contain. Creates a Sqlite database with information about
 those relations and an OSM file containing those relations.
 
+### `oat_problem_report`
+
+Create areas and report all problems encountered into shapefiles. The areas
+themselves are not kept.
+
 ### `oat_sizes`
 
 Prints sizes of some C++ structures used in assembling areas from their parts.
