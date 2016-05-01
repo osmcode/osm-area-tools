@@ -15,24 +15,30 @@
 #include <osmium/io/any_output.hpp>
 #include <osmium/util/memory.hpp>
 
-bool check_relation(const osmium::Relation& relation, char mptype) {
+bool check_relation(const osmium::Relation& relation, char mptype, int& error_count) {
+    bool okay = true;
+
     for (const auto& member : relation.members()) {
 
         // relations of type=multipolygon should not have anything but way members
         if (member.type() != osmium::item_type::way && mptype == 'm') {
-            return false;
+            std::cout << 'r' << relation.id() << " non-way member " << osmium::item_type_to_char(member.type()) << member.ref() << " (role='" << member.role() << "')\n";
+            ++error_count;
+            okay = false;
         }
 
         // way members should have role "outer" or "inner" or be empty
         if (member.type() == osmium::item_type::way) {
             const char* r = member.role();
             if (*r != '\0' && std::strcmp(r, "outer") && std::strcmp(r, "inner")) {
-                return false;
+                std::cout << 'r' << relation.id() << " wrong role '" << r << "'\n";
+                ++error_count;
+                okay = false;
             }
         }
     }
 
-    return true;
+    return okay;
 }
 
 void print_help() {
@@ -42,6 +48,18 @@ void print_help() {
               << "  -h, --help                  This help message\n"
               << "  -f, --output-format=FORMAT  Format of output file\n"
               << "  -o, --output=FILE           Output file\n";
+}
+
+char mp_type(const char* type) {
+    char mptype = ' ';
+
+    if (!std::strcmp(type, "multipolygon")) {
+        mptype = 'm';
+    } else if (!std::strcmp(type, "boundary")) {
+        mptype = 'b';
+    }
+
+    return mptype;
 }
 
 int main(int argc, char* argv[]) {
@@ -87,17 +105,14 @@ int main(int argc, char* argv[]) {
 
     osmium::io::File input_file{argv[optind]};
     osmium::io::Reader reader(input_file, osmium::osm_entity_bits::relation);
+
+    int error_count = 0;
     while (const osmium::memory::Buffer buffer = reader.read()) {
         for (auto it = buffer.begin<osmium::Relation>(); it != buffer.end<osmium::Relation>(); ++it) {
             const char* type = it->tags().get_value_by_key("type");
             if (type) {
-                char mptype = ' ';
-                if (!std::strcmp(type, "multipolygon")) {
-                    mptype = 'm';
-                } else if (!std::strcmp(type, "boundary")) {
-                    mptype = 'b';
-                }
-                if (mptype != ' ' && !check_relation(*it, mptype)) {
+                char mptype = mp_type(type);
+                if (mptype != ' ' && !check_relation(*it, mptype, error_count)) {
                     writer(*it);
                 }
             }
@@ -112,6 +127,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "Peak memory usage: " << mcheck.peak() << "MB\n";
     }
 
-    exit(0);
+    std::cerr << "Found " << error_count << " errors\n";
+
+    exit(error_count > 0 ? 1 : 0);
 }
 
