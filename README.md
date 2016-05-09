@@ -36,6 +36,8 @@ Osmium/OSM Area Tools uses the following naming conventions:
 
 ## Programs
 
+[![Build Status](https://travis-ci.org/osmcode/osm-area-tools.svg?branch=master)](https://travis-ci.org/osmcode/osm-area-tools)
+
 ### `oat_create_areas`
 
 Assembles areas from their parts and optionally checks them for validity. Can
