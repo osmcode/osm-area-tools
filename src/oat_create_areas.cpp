@@ -132,7 +132,11 @@ void print_help() {
               << "  -O, --overwrite              Overwrite existing database\n"
               << "  -p, --report-problems[=FILE] Report problems to file (default: stdout)\n"
               << "  -r, --show-incomplete        Show incomplete relations\n"
-              << "  -R, --check-roles            Check tagged member roles\n";
+              << "  -R, --check-roles            Check tagged member roles\n"
+              << "  -s, --no-new-style           Do not output new style multipolygons\n"
+              << "  -S, --no-old-style           Do not output old style multipolygons\n"
+              << "  -w, --no-way-polygons        Do not output areas created from ways\n"
+              ;
 }
 
 class DummyAssembler {
@@ -239,6 +243,9 @@ int main(int argc, char* argv[]) {
         {"report-problems", optional_argument, 0, 'p'},
         {"show-incomplete", no_argument,       0, 'r'},
         {"check-roles",     no_argument,       0, 'R'},
+        {"no-new-style",    no_argument,       0, 's'},
+        {"no-old-style",    no_argument,       0, 'S'},
+        {"no-way-polygons", no_argument,       0, 'w'},
         {0, 0, 0, 0}
     };
 
@@ -258,9 +265,12 @@ int main(int argc, char* argv[]) {
     bool overwrite = false;
     bool check_roles = false;
     bool create_empty_areas = false;
+    bool way_polygons = true;
+    bool new_style_polygons = true;
+    bool old_style_polygons = true;
 
     while (true) {
-        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rR", long_options, 0);
+        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsSw", long_options, 0);
         if (c == -1) {
             break;
         }
@@ -324,6 +334,15 @@ int main(int argc, char* argv[]) {
             case 'R':
                 check_roles = true;
                 break;
+            case 's':
+                new_style_polygons = false;
+                break;
+            case 'S':
+                old_style_polygons = false;
+                break;
+            case 'w':
+                way_polygons = false;
+                break;
             default:
                 exit(1);
         }
@@ -372,6 +391,9 @@ int main(int argc, char* argv[]) {
         assembler_config.check_roles = check_roles;
         assembler_config.create_empty_areas = create_empty_areas;
         assembler_config.debug_level = debug_level;
+        assembler_config.create_way_polygons = way_polygons;
+        assembler_config.create_new_style_polygons = new_style_polygons;
+        assembler_config.create_old_style_polygons = old_style_polygons;
 
         std::unique_ptr<osmium::area::ProblemReporter> reporter{nullptr};
 
