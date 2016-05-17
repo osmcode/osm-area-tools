@@ -62,6 +62,18 @@ Assembles areas from their parts and optionally checks them for validity.
     all ways that are outer rings are tagged "outer" and all ways that are
     inner rings are tagged "inner".
 
+-s, --no-new-style
+:   Do not output new style multipolygons.
+
+-S, --no-old-style
+:   Do not output old style multipolygons.
+
+-w, --no-way-polygons
+:   Do not output areas created from ways.
+
+-x, --no-areas
+:   Do not output any areas at all (same as `-s -S -w`).
+
 
 ## Index types
 

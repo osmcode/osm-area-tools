@@ -136,6 +136,7 @@ void print_help() {
               << "  -s, --no-new-style           Do not output new style multipolygons\n"
               << "  -S, --no-old-style           Do not output old style multipolygons\n"
               << "  -w, --no-way-polygons        Do not output areas created from ways\n"
+              << "  -x, --no-areas               Do not output areas (same as -s -S -w)\n"
               ;
 }
 
@@ -246,6 +247,7 @@ int main(int argc, char* argv[]) {
         {"no-new-style",    no_argument,       0, 's'},
         {"no-old-style",    no_argument,       0, 'S'},
         {"no-way-polygons", no_argument,       0, 'w'},
+        {"no-areas",        no_argument,       0, 'x'},
         {0, 0, 0, 0}
     };
 
@@ -270,7 +272,7 @@ int main(int argc, char* argv[]) {
     bool old_style_polygons = true;
 
     while (true) {
-        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsSw", long_options, 0);
+        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsSwx", long_options, 0);
         if (c == -1) {
             break;
         }
@@ -341,6 +343,11 @@ int main(int argc, char* argv[]) {
                 old_style_polygons = false;
                 break;
             case 'w':
+                way_polygons = false;
+                break;
+            case 'x':
+                new_style_polygons = false;
+                old_style_polygons = false;
                 way_polygons = false;
                 break;
             default:
