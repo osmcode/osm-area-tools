@@ -134,9 +134,9 @@ int main(int argc, char* argv[]) {
     osmium::io::Reader reader2(input_file, entity_bits(location_index_type));
 
     if (location_index_type == "none") {
-        osmium::apply(reader2, collector.handler());
+        osmium::apply(reader2, collector.handler([](osmium::memory::Buffer&&){}));
     } else {
-        osmium::apply(reader2, location_handler, collector.handler());
+        osmium::apply(reader2, location_handler, collector.handler([](osmium::memory::Buffer&&){}));
     }
 
     reader2.close();
