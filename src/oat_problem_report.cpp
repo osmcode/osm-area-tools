@@ -44,8 +44,7 @@ void print_help() {
 
 using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembler>;
 
-template <typename TCollector>
-void read_relations(TCollector& collector, osmium::io::File& file) {
+void read_relations(collector_type& collector, const osmium::io::File& file) {
     osmium::io::Reader reader(file, osmium::osm_entity_bits::relation);
     collector.read_relations(reader);
     reader.close();
