@@ -6,6 +6,10 @@
 #
 #-----------------------------------------------------------------------------
 
+add_executable(oat_closed_way_filter oat_closed_way_filter.cpp)
+target_link_libraries(oat_closed_way_filter ${OSMIUM_LIBRARIES})
+install(TARGETS oat_closed_way_filter DESTINATION bin)
+
 add_executable(oat_create_areas oat_create_areas.cpp)
 target_link_libraries(oat_create_areas ${OSMIUM_LIBRARIES})
 install(TARGETS oat_create_areas DESTINATION bin)

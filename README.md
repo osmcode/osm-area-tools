@@ -38,6 +38,10 @@ Osmium/OSM Area Tools uses the following naming conventions:
 
 [![Build Status](https://travis-ci.org/osmcode/osm-area-tools.svg?branch=master)](https://travis-ci.org/osmcode/osm-area-tools)
 
+### `oat_closed_way_filter`
+
+Copy only closed ways from input file to output file.
+
 ### `oat_create_areas`
 
 Assembles areas from their parts and optionally checks them for validity. Can
