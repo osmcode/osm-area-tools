@@ -7,6 +7,8 @@
 *****************************************************************************/
 
 #include <algorithm>
+#include <array>
+#include <cstdlib>
 #include <cstring>
 #include <getopt.h>
 #include <iostream>

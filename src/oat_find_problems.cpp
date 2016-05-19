@@ -6,13 +6,18 @@
 
 *****************************************************************************/
 
-#include <iostream>
-
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
+#include <iostream>
+#include <string>
 
-#include <osmium/handler.hpp>
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
+#include <osmium/memory/buffer.hpp>
+#include <osmium/osm/entity_bits.hpp>
+#include <osmium/osm/item_type.hpp>
+#include <osmium/osm/relation.hpp>
 #include <osmium/util/memory.hpp>
 
 #include "oat.hpp"

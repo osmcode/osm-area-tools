@@ -6,9 +6,9 @@
 
 *****************************************************************************/
 
-#include <iostream>
-
+#include <cstdlib>
 #include <getopt.h>
+#include <iostream>
 
 #include <gdalcpp.hpp>
 
