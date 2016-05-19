@@ -28,6 +28,8 @@
 #include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
+#include "oat.hpp"
+
 using index_type = osmium::index::map::Map<osmium::unsigned_object_id_type, osmium::Location>;
 using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;
 
@@ -35,11 +37,12 @@ REGISTER_MAP(osmium::unsigned_object_id_type, osmium::Location, osmium::index::m
 
 void print_help() {
     std::cout << "oat_problem_report [OPTIONS] OSMFILE\n\n"
-              << "Build multipolygons from OSMFILE and report problem in shapefiles.\n"
-              << "\nOptions:\n"
+              << "Build multipolygons from OSMFILE and report problems in shapefiles.\n\n"
+              << "Options:\n"
               << "  -h, --help                   This help message\n"
               << "  -i, --index=INDEX_TYPE       Set index type for location index (default: sparse_mmap_array)\n"
-              << "  -I, --show-index-types       Show available index types for location index\n";
+              << "  -I, --show-index-types       Show available index types for location index\n"
+              ;
 }
 
 using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembler>;
@@ -61,10 +64,10 @@ osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type
 int main(int argc, char* argv[]) {
     osmium::util::VerboseOutput vout{true};
 
-    static struct option long_options[] = {
-        {"help",            no_argument,       0, 'h'},
-        {"index",           required_argument, 0, 'i'},
-        {"show-index",      no_argument,       0, 'I'},
+    static const struct option long_options[] = {
+        {"help",       no_argument,       0, 'h'},
+        {"index",      required_argument, 0, 'i'},
+        {"show-index", no_argument,       0, 'I'},
         {0, 0, 0, 0}
     };
 
@@ -82,7 +85,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(0);
+                exit(exit_code_ok);
             case 'i':
                 location_index_type = optarg;
                 break;
@@ -95,23 +98,23 @@ int main(int argc, char* argv[]) {
                     }
                     std::cout << '\n';
                 }
-                exit(0);
+                exit(exit_code_ok);
             default:
-                exit(1);
+                exit(exit_code_cmdline_error);
         }
     }
 
     int remaining_args = argc - optind;
     if (remaining_args != 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(1);
+        exit(exit_code_cmdline_error);
     }
 
     auto location_index = map_factory.create_map(location_index_type);
     location_handler_type location_handler(*location_index);
     location_handler.ignore_errors(); // XXX
 
-    osmium::io::File input_file(argv[optind]);
+    const osmium::io::File input_file(argv[optind]);
 
     osmium::area::Assembler::config_type assembler_config;
     assembler_config.check_roles = true;
@@ -144,7 +147,7 @@ int main(int argc, char* argv[]) {
 
     collector.used_memory();
 
-    vout << "Stats:" << collector.stats() << "\n";
+    vout << "Stats:" << collector.stats() << '\n';
 
     vout << "Estimated memory usage:\n";
     vout << "  location index: " << (location_index->used_memory() / (1024 * 1024)) << "MB\n";
@@ -155,5 +158,7 @@ int main(int argc, char* argv[]) {
          << "  peak:    " << mcheck.peak() << "MB\n";
 
     vout << "Done.\n";
+
+    return exit_code_ok;
 }
 

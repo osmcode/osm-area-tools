@@ -20,6 +20,8 @@
 #include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
+#include "oat.hpp"
+
 class StatsHandler : public osmium::handler::Handler {
 
     uint32_t m_ways_all = 0;
@@ -215,14 +217,14 @@ int main(int argc, char* argv[]) {
 
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " OSMFILE\n";
-        exit(1);
+        exit(exit_code_cmdline_error);
     }
 
     StatsHandler stats_handler;
 
     vout << "Reading OSM data...\n";
 
-    osmium::io::File infile(argv[1]);
+    const osmium::io::File infile(argv[1]);
     osmium::io::Reader reader(infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation);
     osmium::apply(reader, stats_handler);
     reader.close();
@@ -231,5 +233,7 @@ int main(int argc, char* argv[]) {
     stats_handler.write_stats_to_db("area-stats.db");
 
     vout << "Done.\n";
+
+    return exit_code_ok;
 }
 

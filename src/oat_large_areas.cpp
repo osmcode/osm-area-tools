@@ -20,6 +20,8 @@
 #include <osmium/util/memory.hpp>
 #include <osmium/visitor.hpp>
 
+#include "oat.hpp"
+
 class LargeAreasHandler : public osmium::handler::Handler {
 
     std::unordered_map<uint32_t, uint32_t> m_nodes_in_ways;
@@ -99,16 +101,17 @@ public:
 
 void print_help() {
     std::cout << "oat_large_areas [OPTIONS] OSMFILE\n\n"
-              << "Find largest area relations in OSMFILE.\n"
-              << "\nOptions:\n"
+              << "Find largest area relations in OSMFILE.\n\n"
+              << "Options:\n"
               << "  -h, --help           This help message\n"
               << "  -n, --min-nodes=NUM  Minimum number of nodes (default: 100000)\n"
               << "  -o, --output=FILE    File name prefix for output files (default: 'large_areas')\n"
-              << "  -w, --min-ways=NUM   Minimum number of ways (default: 1000)\n";
+              << "  -w, --min-ways=NUM   Minimum number of ways (default: 1000)\n"
+              ;
 }
 
 int main(int argc, char* argv[]) {
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"help",      no_argument,       0, 'h'},
         {"min-nodes", required_argument, 0, 'n'},
         {"min-ways",  required_argument, 0, 'w'},
@@ -128,7 +131,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(0);
+                exit(exit_code_ok);
             case 'n':
                 min_nodes = std::atoi(optarg);
                 break;
@@ -139,14 +142,14 @@ int main(int argc, char* argv[]) {
                 output = optarg;
                 break;
             default:
-                exit(1);
+                exit(exit_code_cmdline_error);
         }
     }
 
     int remaining_args = argc - optind;
     if (remaining_args != 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(1);
+        exit(exit_code_cmdline_error);
     }
 
     osmium::io::Writer writer{output + ".osm.pbf"};
@@ -157,7 +160,7 @@ int main(int argc, char* argv[]) {
 
     LargeAreasHandler handler{writer, insert_into_areas, min_ways, min_nodes};
 
-    osmium::io::File infile(argv[optind]);
+    const osmium::io::File infile(argv[optind]);
     osmium::io::Reader reader(infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation);
     osmium::apply(reader, handler);
     reader.close();
@@ -169,6 +172,6 @@ int main(int argc, char* argv[]) {
               << "  current: " << mcheck.current() << "MB\n"
               << "  peak:    " << mcheck.peak() << "MB\n";
 
-    exit(0);
+    return exit_code_ok;
 }
 

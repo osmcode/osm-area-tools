@@ -18,9 +18,12 @@
 #include <osmium/osm/entity_bits.hpp>
 #include <osmium/osm/way.hpp>
 
+#include "oat.hpp"
+
 void print_help() {
-    std::cout << "oat_closed_way_filter [OPTIONS] OSMFILE\n"
-              << "\nOptions:\n"
+    std::cout << "oat_closed_way_filter [OPTIONS] OSMFILE -o OUTPUT\n\n"
+              << "Copy closed ways from OSMFILE to OUTPUT.\n\n"
+              << "Options:\n"
               << "  -h, --help           - This help message\n"
               << "  -o, --output=OSMFILE - Where to write output\n"
               << "  -O, --overwrite      - Allow overwriting of output file\n"
@@ -31,7 +34,7 @@ int main(int argc, char* argv[]) {
     std::string output_filename;
     auto overwrite = osmium::io::overwrite::no;
 
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"help",            no_argument, 0, 'h'},
         {"output",    required_argument, 0, 'o'},
         {"overwrite",       no_argument, 0, 'O'},
@@ -46,7 +49,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(0);
+                exit(exit_code_ok);
             case 'o':
                 output_filename = optarg;
                 break;
@@ -54,18 +57,13 @@ int main(int argc, char* argv[]) {
                 overwrite = osmium::io::overwrite::allow;
                 break;
             default:
-                exit(2);
+                exit(exit_code_cmdline_error);
         }
     }
 
-    if (output_filename.empty()) {
-        std::cerr << "Missing -o/--output=OSMFILE option\n";
-        exit(2);
-    }
-
-    if (optind != argc - 1) {
-        std::cerr << "Usage: oat_closed_way_filter [OPTIONS] OSMFILE\n";
-        exit(2);
+    if (output_filename.empty() || optind != argc - 1) {
+        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE -o OUTPUT\n";
+        exit(exit_code_cmdline_error);
     }
 
     const osmium::io::File infile(argv[optind]);
@@ -87,6 +85,6 @@ int main(int argc, char* argv[]) {
     writer.close();
     reader.close();
 
-    return 0;
+    return exit_code_ok;
 }
 

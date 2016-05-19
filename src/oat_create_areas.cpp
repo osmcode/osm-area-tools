@@ -38,6 +38,8 @@
 #include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
+#include "oat.hpp"
+
 using index_type = osmium::index::map::Map<osmium::unsigned_object_id_type, osmium::Location>;
 using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;
 
@@ -92,7 +94,7 @@ public:
                 is_valid = ivo.isValid();
                 if (!is_valid) {
                     auto error = ivo.getValidationError();
-                    std::cerr << "GEOS ERROR: " << error->toString() << "\n";
+                    std::cerr << "GEOS ERROR: " << error->toString() << '\n';
                 }
 #else
                 is_valid = geom->IsValid();
@@ -167,7 +169,7 @@ using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembl
 using collector_only = osmium::area::MultipolygonCollector<DummyAssembler>;
 
 template <typename TCollector>
-void read_relations(TCollector& collector, osmium::io::File& file) {
+void read_relations(TCollector& collector, const osmium::io::File& file) {
     osmium::io::Reader reader(file, osmium::osm_entity_bits::relation);
     collector.read_relations(reader);
     reader.close();
@@ -179,9 +181,9 @@ void show_incomplete_relations(TCollector& collector) {
     if (!incomplete_relations.empty()) {
         std::cerr << "Warning! Some member ways missing for these multipolygon relations:";
         for (const auto* relation : incomplete_relations) {
-            std::cerr << " " << relation->id();
+            std::cerr << ' ' << relation->id();
         }
-        std::cerr << "\n";
+        std::cerr << '\n';
     }
 }
 
@@ -229,7 +231,7 @@ osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type
 int main(int argc, char* argv[]) {
     osmium::util::VerboseOutput vout{true};
 
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"check",           no_argument,       0, 'c'},
         {"collect-only",    no_argument,       0, 'C'},
         {"only-invalid",    no_argument,       0, 'f'},
@@ -303,7 +305,7 @@ int main(int argc, char* argv[]) {
                 break;
             case 'h':
                 print_help();
-                exit(0);
+                exit(exit_code_ok);
             case 'i':
                 location_index_type = optarg;
                 break;
@@ -316,7 +318,7 @@ int main(int argc, char* argv[]) {
                     }
                     std::cout << '\n';
                 }
-                exit(0);
+                exit(exit_code_ok);
             case 'o':
                 database_name = optarg;
                 break;
@@ -351,21 +353,21 @@ int main(int argc, char* argv[]) {
                 way_polygons = false;
                 break;
             default:
-                exit(1);
+                exit(exit_code_cmdline_error);
         }
     }
 
     int remaining_args = argc - optind;
     if (remaining_args != 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(1);
+        exit(exit_code_cmdline_error);
     }
 
     auto location_index = map_factory.create_map(location_index_type);
     location_handler_type location_handler(*location_index);
     location_handler.ignore_errors(); // XXX
 
-    osmium::io::File input_file(argv[optind]);
+    const osmium::io::File input_file(argv[optind]);
 
     bool need_locations = location_index_type != "none";
 
@@ -392,7 +394,7 @@ int main(int argc, char* argv[]) {
         vout << "Memory:\n";
         collector.used_memory();
 
-        vout << "Stats:" << collector.stats() << "\n";
+        vout << "Stats:" << collector.stats() << '\n';
     } else {
         osmium::area::Assembler::config_type assembler_config;
         assembler_config.check_roles = check_roles;
@@ -433,7 +435,7 @@ int main(int argc, char* argv[]) {
             vout << "Memory:\n";
             collector.used_memory();
 
-            vout << "Stats:" << collector.stats() << "\n";
+            vout << "Stats:" << collector.stats() << '\n';
 
             if (show_incomplete) {
                 show_incomplete_relations(collector);
@@ -503,7 +505,7 @@ int main(int argc, char* argv[]) {
 
             collector.used_memory();
 
-            vout << "Stats:" << collector.stats() << "\n";
+            vout << "Stats:" << collector.stats() << '\n';
 
             if (show_incomplete) {
                 show_incomplete_relations(collector);
@@ -520,5 +522,7 @@ int main(int argc, char* argv[]) {
          << "  peak:    " << mcheck.peak() << "MB\n";
 
     vout << "Done.\n";
+
+    return exit_code_ok;
 }
 

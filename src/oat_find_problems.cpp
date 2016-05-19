@@ -15,6 +15,8 @@
 #include <osmium/io/any_output.hpp>
 #include <osmium/util/memory.hpp>
 
+#include "oat.hpp"
+
 bool check_relation(const osmium::Relation& relation, char mptype, int& error_count) {
     bool okay = true;
 
@@ -43,11 +45,12 @@ bool check_relation(const osmium::Relation& relation, char mptype, int& error_co
 
 void print_help() {
     std::cout << "oat_find_problems [OPTIONS] OSMFILE\n\n"
-              << "Find problems in area relations in OSMFILE.\n"
-              << "\nOptions:\n"
+              << "Find problems in area relations in OSMFILE.\n\n"
+              << "Options:\n"
               << "  -h, --help                  This help message\n"
               << "  -f, --output-format=FORMAT  Format of output file\n"
-              << "  -o, --output=FILE           Output file\n";
+              << "  -o, --output=FILE           Output file\n"
+              ;
 }
 
 char mp_type(const char* type) {
@@ -63,7 +66,7 @@ char mp_type(const char* type) {
 }
 
 int main(int argc, char* argv[]) {
-    static struct option long_options[] = {
+    static const struct option long_options[] = {
         {"help",          no_argument,       0, 'h'},
         {"output-format", required_argument, 0, 'f'},
         {"output",        required_argument, 0, 'o'},
@@ -81,7 +84,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(0);
+                exit(exit_code_ok);
             case 'f':
                 output_format = optarg;
                 break;
@@ -89,18 +92,18 @@ int main(int argc, char* argv[]) {
                 output = optarg;
                 break;
             default:
-                exit(1);
+                exit(exit_code_cmdline_error);
         }
     }
 
     int remaining_args = argc - optind;
     if (remaining_args != 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(1);
+        exit(exit_code_cmdline_error);
     }
 
 
-    osmium::io::File output_file{output, output_format};
+    const osmium::io::File output_file{output, output_format};
     osmium::io::Writer writer{output_file};
 
     osmium::io::File input_file{argv[optind]};
@@ -129,6 +132,6 @@ int main(int argc, char* argv[]) {
 
     std::cerr << "Found " << error_count << " errors\n";
 
-    exit(error_count > 0 ? 1 : 0);
+    return error_count > 0 ? exit_code_error : exit_code_ok;
 }
 
