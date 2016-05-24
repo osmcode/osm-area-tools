@@ -68,6 +68,10 @@ Assembles areas from their parts and optionally checks them for validity.
 -S, --no-old-style
 :   Do not output old style multipolygons.
 
+-t, --keep-type-tag
+:   Keep the type tag from multipolygon relations and put it on the assembled
+    area. Default is false, the type tag will be removed.
+
 -w, --no-way-polygons
 :   Do not output areas created from ways.
 

@@ -136,6 +136,7 @@ void print_help() {
               << "  -r, --show-incomplete        Show incomplete relations\n"
               << "  -R, --check-roles            Check tagged member roles\n"
               << "  -s, --no-new-style           Do not output new style multipolygons\n"
+              << "  -t, --keep-type-tag          Keep type tag from mp relation (default: false)\n"
               << "  -S, --no-old-style           Do not output old style multipolygons\n"
               << "  -w, --no-way-polygons        Do not output areas created from ways\n"
               << "  -x, --no-areas               Do not output areas (same as -s -S -w)\n"
@@ -247,6 +248,7 @@ int main(int argc, char* argv[]) {
         {"show-incomplete", no_argument,       0, 'r'},
         {"check-roles",     no_argument,       0, 'R'},
         {"no-new-style",    no_argument,       0, 's'},
+        {"keep-type-tag",   no_argument,       0, 't'},
         {"no-old-style",    no_argument,       0, 'S'},
         {"no-way-polygons", no_argument,       0, 'w'},
         {"no-areas",        no_argument,       0, 'x'},
@@ -272,9 +274,10 @@ int main(int argc, char* argv[]) {
     bool way_polygons = true;
     bool new_style_polygons = true;
     bool old_style_polygons = true;
+    bool keep_type_tag = false;
 
     while (true) {
-        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsSwx", long_options, 0);
+        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, 0);
         if (c == -1) {
             break;
         }
@@ -344,6 +347,9 @@ int main(int argc, char* argv[]) {
             case 'S':
                 old_style_polygons = false;
                 break;
+            case 't':
+                keep_type_tag = true;
+                break;
             case 'w':
                 way_polygons = false;
                 break;
@@ -403,6 +409,7 @@ int main(int argc, char* argv[]) {
         assembler_config.create_way_polygons = way_polygons;
         assembler_config.create_new_style_polygons = new_style_polygons;
         assembler_config.create_old_style_polygons = old_style_polygons;
+        assembler_config.keep_type_tag = keep_type_tag;
 
         std::unique_ptr<osmium::area::ProblemReporter> reporter{nullptr};
 
