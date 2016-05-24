@@ -263,18 +263,14 @@ int main(int argc, char* argv[]) {
     optional_output dump_stream;
     optional_output problem_stream;
 
-    int debug_level = 0;
     bool check = false;
     bool collect_only = false;
     bool only_invalid = false;
     bool show_incomplete = false;
     bool overwrite = false;
-    bool check_roles = false;
-    bool create_empty_areas = false;
-    bool way_polygons = true;
-    bool new_style_polygons = true;
-    bool old_style_polygons = true;
-    bool keep_type_tag = false;
+
+    osmium::area::Assembler::config_type assembler_config;
+    assembler_config.create_empty_areas = false;
 
     while (true) {
         int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, 0);
@@ -290,7 +286,7 @@ int main(int argc, char* argv[]) {
                 collect_only = true;
                 break;
             case 'd':
-                debug_level = optarg ? std::atoi(optarg) : 1;
+                assembler_config.debug_level = optarg ? std::atoi(optarg) : 1;
                 break;
             case 'D':
                 if (optarg) {
@@ -300,7 +296,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             case 'e':
-                create_empty_areas = true;
+                assembler_config.create_empty_areas = true;
                 break;
             case 'f':
                 only_invalid = true;
@@ -339,24 +335,24 @@ int main(int argc, char* argv[]) {
                 show_incomplete = true;
                 break;
             case 'R':
-                check_roles = true;
+                assembler_config.check_roles = true;
                 break;
             case 's':
-                new_style_polygons = false;
+                assembler_config.create_new_style_polygons = false;
                 break;
             case 'S':
-                old_style_polygons = false;
+                assembler_config.create_old_style_polygons = false;
                 break;
             case 't':
-                keep_type_tag = true;
+                assembler_config.keep_type_tag = true;
                 break;
             case 'w':
-                way_polygons = false;
+                assembler_config.create_way_polygons = false;
                 break;
             case 'x':
-                new_style_polygons = false;
-                old_style_polygons = false;
-                way_polygons = false;
+                assembler_config.create_new_style_polygons = false;
+                assembler_config.create_old_style_polygons = false;
+                assembler_config.create_way_polygons = false;
                 break;
             default:
                 exit(exit_code_cmdline_error);
@@ -402,15 +398,6 @@ int main(int argc, char* argv[]) {
 
         vout << "Stats:" << collector.stats() << '\n';
     } else {
-        osmium::area::Assembler::config_type assembler_config;
-        assembler_config.check_roles = check_roles;
-        assembler_config.create_empty_areas = create_empty_areas;
-        assembler_config.debug_level = debug_level;
-        assembler_config.create_way_polygons = way_polygons;
-        assembler_config.create_new_style_polygons = new_style_polygons;
-        assembler_config.create_old_style_polygons = old_style_polygons;
-        assembler_config.keep_type_tag = keep_type_tag;
-
         std::unique_ptr<osmium::area::ProblemReporter> reporter{nullptr};
 
         if (problem_stream) {
@@ -419,7 +406,6 @@ int main(int argc, char* argv[]) {
         }
 
         if (database_name.empty()) {
-
             collector_type collector(assembler_config);
 
             vout << "Starting first pass (reading relations)...\n";
