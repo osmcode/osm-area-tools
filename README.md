@@ -48,6 +48,11 @@ Assembles areas from their parts and optionally checks them for validity. Can
 write the areas to a Spatialite database including all the problems encountered
 on the way.
 
+### `oat_failed_area_tags`
+
+Creates areas but only looks at those areas which could not be built due to
+geometry problems. Creates some tag statistics on stdout.
+
 ### `oat_find_problems`
 
 Find problematic data with respect to area creation. This program does not try

@@ -18,6 +18,10 @@ add_executable(oat_create_areas oat_create_areas.cpp)
 target_link_libraries(oat_create_areas ${OSMIUM_LIBRARIES})
 install(TARGETS oat_create_areas DESTINATION bin)
 
+add_executable(oat_failed_area_tags oat_failed_area_tags.cpp)
+target_link_libraries(oat_failed_area_tags ${OSMIUM_LIBRARIES})
+install(TARGETS oat_failed_area_tags DESTINATION bin)
+
 add_executable(oat_find_problems oat_find_problems.cpp)
 target_link_libraries(oat_find_problems ${OSMIUM_IO_LIBRARIES})
 install(TARGETS oat_find_problems DESTINATION bin)
