@@ -71,6 +71,7 @@ struct tag_counter {
     size_t natural  = 0;
     size_t place    = 0;
     size_t sport    = 0;
+    size_t waterway = 0;
 
     size_t unknown  = 0;
 
@@ -164,7 +165,9 @@ int main(int argc, char* argv[]) {
                 } else if (area.tags().has_key("leisure")) {
                     ++counter.leisure;
                 } else if (area.tags().has_key("place")) {
-                    ++counter.leisure;
+                    ++counter.place;
+                } else if (area.tags().has_key("waterway")) {
+                    ++counter.waterway;
                 } else {
                     ++counter.unknown;
                     for (const osmium::Tag& tag : area.tags()) {
@@ -191,6 +194,7 @@ int main(int argc, char* argv[]) {
     std::cout << "natural:   " << counter.natural  << '\n';
     std::cout << "place:     " << counter.place    << '\n';
     std::cout << "sport:     " << counter.sport    << '\n';
+    std::cout << "waterway:  " << counter.waterway << '\n';
 
     std::cout << "unknown:   " << counter.unknown << '\n';
 
