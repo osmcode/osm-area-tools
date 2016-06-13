@@ -67,7 +67,7 @@ public:
 
     OutputOGR(gdalcpp::Dataset& dataset, osmium::geom::OGRFactory<>& factory) :
         m_factory(factory),
-        m_layer_multipolygons(dataset, "areas", wkbMultiPolygon) {
+        m_layer_multipolygons(dataset, "areas", wkbMultiPolygon, {"SPATIAL_INDEX=NO"}) {
         m_layer_multipolygons.add_field("id", OFTInteger, 10);
         m_layer_multipolygons.add_field("valid", OFTInteger, 1);
         m_layer_multipolygons.add_field("source", OFTString, 1);
@@ -441,7 +441,7 @@ int main(int argc, char* argv[]) {
             CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
             osmium::geom::OGRFactory<> factory;
 
-            gdalcpp::Dataset dataset{"SQLite", database_name, gdalcpp::SRS{factory.proj_string()}, { "SPATIALITE=TRUE", "INIT_WITH_EPSG=NO", "SPATIAL_INDEX=NO" }};
+            gdalcpp::Dataset dataset{"SQLite", database_name, gdalcpp::SRS{factory.proj_string()}, { "SPATIALITE=TRUE", "INIT_WITH_EPSG=NO" }};
             dataset.enable_auto_transactions();
 
             dataset.exec("PRAGMA journal_mode = OFF;");
