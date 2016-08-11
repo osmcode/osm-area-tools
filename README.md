@@ -91,6 +91,20 @@ later are known to work. You also need the following libraries:
         Need at least version 2.6.1
         http://osmcode.org/libosmium
 
+    Protozero
+        https://github.com/mapbox/protozero
+        Debian/Ubuntu: protozero
+        Also included in the libosmium repository.
+
+    Utfcpp
+        http://utfcpp.sourceforge.net/
+        Debian/Ubuntu: libutfcpp-dev
+        Also included in the libosmium repository.
+
+    gdalcpp
+        https://github.com/joto/gdalcpp
+        Also included in the libosmium repository.
+
     bz2lib (for reading and writing bzipped files)
         http://www.bzip.org/
         Debian/Ubuntu: libbz2-dev
