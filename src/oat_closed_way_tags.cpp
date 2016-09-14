@@ -149,9 +149,9 @@ int main(int argc, char* argv[]) {
         std::exit(exit_code_cmdline_error);
     }
 
-    const osmium::io::File infile(argv[optind]);
+    const osmium::io::File infile{argv[optind]};
 
-    osmium::io::Reader reader(infile, osmium::osm_entity_bits::way);
+    osmium::io::Reader reader{infile, osmium::osm_entity_bits::way};
     osmium::io::Header header = reader.header();
     header.set("generator", "oat_closed_way_tags");
 

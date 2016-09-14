@@ -49,7 +49,7 @@ void print_help() {
 using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembler>;
 
 void read_relations(collector_type& collector, const osmium::io::File& file) {
-    osmium::io::Reader reader(file, osmium::osm_entity_bits::relation);
+    osmium::io::Reader reader{file, osmium::osm_entity_bits::relation};
     collector.read_relations(reader);
     reader.close();
 }
@@ -63,19 +63,19 @@ osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type
 }
 
 struct tag_counter {
-    size_t amenity  = 0;
-    size_t boundary = 0;
-    size_t building = 0;
-    size_t landuse  = 0;
-    size_t leisure  = 0;
-    size_t natural  = 0;
-    size_t place    = 0;
-    size_t sport    = 0;
-    size_t waterway = 0;
+    std::size_t amenity  = 0;
+    std::size_t boundary = 0;
+    std::size_t building = 0;
+    std::size_t landuse  = 0;
+    std::size_t leisure  = 0;
+    std::size_t natural  = 0;
+    std::size_t place    = 0;
+    std::size_t sport    = 0;
+    std::size_t waterway = 0;
 
-    size_t unknown  = 0;
+    std::size_t unknown  = 0;
 
-    size_t name     = 0;
+    std::size_t name     = 0;
 };
 
 int main(int argc, char* argv[]) {
@@ -88,9 +88,7 @@ int main(int argc, char* argv[]) {
         {0, 0, 0, 0}
     };
 
-//    std::string database_name = "area_problems";
-
-    std::string location_index_type = "sparse_mmap_array";
+    std::string location_index_type{"sparse_mmap_array"};
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     while (true) {
@@ -128,19 +126,19 @@ int main(int argc, char* argv[]) {
     }
 
     auto location_index = map_factory.create_map(location_index_type);
-    location_handler_type location_handler(*location_index);
+    location_handler_type location_handler{*location_index};
     location_handler.ignore_errors(); // XXX
 
-    const osmium::io::File input_file(argv[optind]);
+    const osmium::io::File input_file{argv[optind]};
 
     osmium::area::Assembler::config_type assembler_config;
     assembler_config.create_empty_areas = true;
 
-    collector_type collector(assembler_config);
+    collector_type collector{assembler_config};
 
     read_relations(collector, input_file);
 
-    osmium::io::Reader reader2(input_file, entity_bits(location_index_type));
+    osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
 
     tag_counter counter;
 

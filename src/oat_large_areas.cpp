@@ -31,8 +31,8 @@ class LargeAreasHandler : public osmium::handler::Handler {
 
     Sqlite::Statement& m_insert_into_areas;
 
-    size_t m_min_ways;
-    size_t m_min_nodes;
+    std::size_t m_min_ways;
+    std::size_t m_min_nodes;
 
     static std::pair<const char*, const char*> get_subtype(const osmium::TagList& tags) {
         for (const osmium::Tag& tag : tags) {
@@ -51,7 +51,7 @@ class LargeAreasHandler : public osmium::handler::Handler {
 
 public:
 
-    LargeAreasHandler(osmium::io::Writer& writer, Sqlite::Statement& insert_into_areas, size_t min_ways, size_t min_nodes) :
+    LargeAreasHandler(osmium::io::Writer& writer, Sqlite::Statement& insert_into_areas, std::size_t min_ways, std::size_t min_nodes) :
         m_writer(writer),
         m_insert_into_areas(insert_into_areas),
         m_min_ways(min_ways),
@@ -68,8 +68,8 @@ public:
             return;
         }
         if (!strcmp(type, "multipolygon") || !strcmp(type, "boundary")) {
-            size_t num_ways = 0;
-            size_t num_nodes = 0;
+            std::size_t num_ways = 0;
+            std::size_t num_nodes = 0;
             for (const auto& member : relation.members()) {
                 if (member.type() == osmium::item_type::way) {
                     ++num_ways;
@@ -120,8 +120,8 @@ int main(int argc, char* argv[]) {
         {0, 0, 0, 0}
     };
 
-    size_t min_ways = 1000;
-    size_t min_nodes = 100000;
+    std::size_t min_ways = 1000;
+    std::size_t min_nodes = 100000;
     std::string output{"large_areas"};
     while (true) {
         int c = getopt_long(argc, argv, "hn:o:w:", long_options, 0);
@@ -161,8 +161,8 @@ int main(int argc, char* argv[]) {
 
     LargeAreasHandler handler{writer, insert_into_areas, min_ways, min_nodes};
 
-    const osmium::io::File infile(argv[optind]);
-    osmium::io::Reader reader(infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation);
+    const osmium::io::File infile{argv[optind]};
+    osmium::io::Reader reader{infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation};
     osmium::apply(reader, handler);
     reader.close();
 

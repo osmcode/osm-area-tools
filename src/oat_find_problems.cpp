@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
     osmium::io::Writer writer{output_file};
 
     osmium::io::File input_file{argv[optind]};
-    osmium::io::Reader reader(input_file, osmium::osm_entity_bits::relation);
+    osmium::io::Reader reader{input_file, osmium::osm_entity_bits::relation};
 
     int error_count = 0;
     while (const osmium::memory::Buffer buffer = reader.read()) {

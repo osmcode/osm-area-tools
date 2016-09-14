@@ -109,7 +109,7 @@ public:
             feature.set_field("source", area.from_way() ? "w" : "r");
             feature.set_field("orig_id", static_cast<int32_t>(area.orig_id()));
             feature.add_to_layer();
-        } catch (osmium::geometry_error& e) {
+        } catch (const osmium::geometry_error& e) {
             print_area_error(area, e);
         }
     }
@@ -151,7 +151,7 @@ public:
 
     struct config_type {};
 
-    DummyAssembler(const config_type&) {
+    explicit DummyAssembler(const config_type&) {
     }
 
     void operator()(const osmium::Way&, osmium::memory::Buffer&) {
@@ -171,7 +171,7 @@ using collector_only = osmium::area::MultipolygonCollector<DummyAssembler>;
 
 template <typename TCollector>
 void read_relations(TCollector& collector, const osmium::io::File& file) {
-    osmium::io::Reader reader(file, osmium::osm_entity_bits::relation);
+    osmium::io::Reader reader{file, osmium::osm_entity_bits::relation};
     collector.read_relations(reader);
     reader.close();
 }
@@ -257,7 +257,7 @@ int main(int argc, char* argv[]) {
 
     std::string database_name;
 
-    std::string location_index_type = "sparse_mmap_array";
+    std::string location_index_type{"sparse_mmap_array"};
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     optional_output dump_stream;
@@ -366,10 +366,10 @@ int main(int argc, char* argv[]) {
     }
 
     auto location_index = map_factory.create_map(location_index_type);
-    location_handler_type location_handler(*location_index);
+    location_handler_type location_handler{*location_index};
     location_handler.ignore_errors(); // XXX
 
-    const osmium::io::File input_file(argv[optind]);
+    const osmium::io::File input_file{argv[optind]};
 
     bool need_locations = location_index_type != "none";
 
@@ -384,7 +384,7 @@ int main(int argc, char* argv[]) {
         collector.used_memory();
 
         vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
-        osmium::io::Reader reader2(input_file, entity_bits(location_index_type));
+        osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
         if (need_locations) {
             osmium::apply(reader2, location_handler, collector.handler());
         } else {
@@ -406,7 +406,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (database_name.empty()) {
-            collector_type collector(assembler_config);
+            collector_type collector{assembler_config};
 
             vout << "Starting first pass (reading relations)...\n";
             read_relations(collector, input_file);
@@ -416,7 +416,7 @@ int main(int argc, char* argv[]) {
             collector.used_memory();
 
             vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
-            osmium::io::Reader reader2(input_file, entity_bits(location_index_type));
+            osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
             if (need_locations) {
                 osmium::apply(reader2, location_handler, collector.handler([](osmium::memory::Buffer&&) {}));
             } else {
@@ -454,7 +454,7 @@ int main(int argc, char* argv[]) {
                 reporter.reset(new osmium::area::ProblemReporterOGR{dataset});
             }
             assembler_config.problem_reporter = reporter.get();
-            collector_type collector(assembler_config);
+            collector_type collector{assembler_config};
 
             vout << "Starting first pass (reading relations)...\n";
             read_relations(collector, input_file);
@@ -464,7 +464,7 @@ int main(int argc, char* argv[]) {
             collector.used_memory();
 
             vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
-            osmium::io::Reader reader2(input_file, entity_bits(location_index_type));
+            osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
 
             if (dump_stream) {
                 osmium::handler::Dump dump_handler{dump_stream.get()};

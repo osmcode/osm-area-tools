@@ -48,7 +48,7 @@ void print_help() {
 using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembler>;
 
 void read_relations(collector_type& collector, const osmium::io::File& file) {
-    osmium::io::Reader reader(file, osmium::osm_entity_bits::relation);
+    osmium::io::Reader reader{file, osmium::osm_entity_bits::relation};
     collector.read_relations(reader);
     reader.close();
 }
@@ -71,9 +71,9 @@ int main(int argc, char* argv[]) {
         {0, 0, 0, 0}
     };
 
-    std::string database_name = "area_problems";
+    std::string database_name{"area_problems"};
 
-    std::string location_index_type = "sparse_mmap_array";
+    std::string location_index_type{"sparse_mmap_array"};
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     while (true) {
@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
     location_handler_type location_handler(*location_index);
     location_handler.ignore_errors(); // XXX
 
-    const osmium::io::File input_file(argv[optind]);
+    const osmium::io::File input_file{argv[optind]};
 
     osmium::area::Assembler::config_type assembler_config;
     assembler_config.check_roles = true;
@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
     gdalcpp::Dataset dataset{"ESRI Shapefile", database_name, gdalcpp::SRS{factory.proj_string()}};
     osmium::area::ProblemReporterOGR problem_reporter{dataset};
     assembler_config.problem_reporter = &problem_reporter;
-    collector_type collector(assembler_config);
+    collector_type collector{assembler_config};
 
     vout << "Starting first pass (reading relations)...\n";
     read_relations(collector, input_file);
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
     collector.used_memory();
 
     vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
-    osmium::io::Reader reader2(input_file, entity_bits(location_index_type));
+    osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
 
     if (location_index_type == "none") {
         osmium::apply(reader2, collector.handler([](osmium::memory::Buffer&&){}));

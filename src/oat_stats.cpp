@@ -188,7 +188,7 @@ public:
 
         {
             Sqlite::Statement statement{db, "INSERT INTO histogram_ways_in_relations (value, num) VALUES (?, ?);"};
-            for (size_t i = 0; i < m_ways_in_relations.size(); ++i) {
+            for (std::size_t i = 0; i < m_ways_in_relations.size(); ++i) {
                 if (m_ways_in_relations[i]) {
                     statement.bind_int(i);
                     statement.bind_int(m_ways_in_relations[i]);
@@ -199,7 +199,7 @@ public:
 
         {
             Sqlite::Statement statement{db, "INSERT INTO histogram_nodes_in_relations (value, num) VALUES (?, ?);"};
-            for (size_t i = 0; i < m_nodes_in_relations.size(); ++i) {
+            for (std::size_t i = 0; i < m_nodes_in_relations.size(); ++i) {
                 if (m_nodes_in_relations[i]) {
                     statement.bind_int(i);
                     statement.bind_int(m_nodes_in_relations[i]);
@@ -225,8 +225,8 @@ int main(int argc, char* argv[]) {
 
     vout << "Reading OSM data...\n";
 
-    const osmium::io::File infile(argv[1]);
-    osmium::io::Reader reader(infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation);
+    const osmium::io::File infile{argv[1]};
+    osmium::io::Reader reader{infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation};
     osmium::apply(reader, stats_handler);
     reader.close();
 

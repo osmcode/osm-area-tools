@@ -67,14 +67,14 @@ int main(int argc, char* argv[]) {
         std::exit(exit_code_cmdline_error);
     }
 
-    const osmium::io::File infile(argv[optind]);
+    const osmium::io::File infile{argv[optind]};
 
-    osmium::io::Reader reader(infile, osmium::osm_entity_bits::way);
+    osmium::io::Reader reader{infile, osmium::osm_entity_bits::way};
 
     osmium::io::Header header = reader.header();
     header.set("generator", "oat_closed_way_filter");
 
-    osmium::io::Writer writer(output_filename, header, overwrite);
+    osmium::io::Writer writer{output_filename, header, overwrite};
     auto output_it = osmium::io::make_output_iterator(writer);
 
     auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
