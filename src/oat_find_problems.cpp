@@ -6,11 +6,13 @@
 
 *****************************************************************************/
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
@@ -24,8 +26,13 @@
 
 bool check_relation(const osmium::Relation& relation, char mptype, int& error_count) {
     bool okay = true;
+    std::vector<osmium::object_id_type> ids;
+    ids.reserve(relation.members().size());
 
     for (const auto& member : relation.members()) {
+        if (member.type() == osmium::item_type::way) {
+            ids.push_back(member.ref());
+        }
 
         // relations of type=multipolygon should not have anything but way members
         if (member.type() != osmium::item_type::way && mptype == 'm') {
@@ -43,6 +50,16 @@ bool check_relation(const osmium::Relation& relation, char mptype, int& error_co
                 okay = false;
             }
         }
+    }
+
+    std::sort(ids.begin(), ids.end());
+
+    auto it = ids.cbegin();
+    while ((it = std::adjacent_find(it, ids.cend())) != ids.cend()) {
+        okay = false;
+        std::cout << 'r' << relation.id() << " has duplicate member way " << *it << '\n';
+        ++it;
+        ++it;
     }
 
     return okay;
