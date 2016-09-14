@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(exit_code_ok);
+                std::exit(exit_code_ok);
             case 'n':
                 min_nodes = std::atoi(optarg);
                 break;
@@ -143,14 +143,14 @@ int main(int argc, char* argv[]) {
                 output = optarg;
                 break;
             default:
-                exit(exit_code_cmdline_error);
+                std::exit(exit_code_cmdline_error);
         }
     }
 
     int remaining_args = argc - optind;
     if (remaining_args != 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(exit_code_cmdline_error);
+        std::exit(exit_code_cmdline_error);
     }
 
     osmium::io::Writer writer{output + ".osm.pbf"};

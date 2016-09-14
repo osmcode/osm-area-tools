@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(exit_code_ok);
+                std::exit(exit_code_ok);
             case 'o':
                 output_prefix = optarg;
                 break;
@@ -140,13 +140,13 @@ int main(int argc, char* argv[]) {
                 overwrite = osmium::io::overwrite::allow;
                 break;
             default:
-                exit(exit_code_cmdline_error);
+                std::exit(exit_code_cmdline_error);
         }
     }
 
     if (optind != argc - 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(exit_code_cmdline_error);
+        std::exit(exit_code_cmdline_error);
     }
 
     const osmium::io::File infile(argv[optind]);

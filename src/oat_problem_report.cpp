@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                exit(exit_code_ok);
+                std::exit(exit_code_ok);
             case 'i':
                 location_index_type = optarg;
                 break;
@@ -98,16 +98,16 @@ int main(int argc, char* argv[]) {
                     }
                     std::cout << '\n';
                 }
-                exit(exit_code_ok);
+                std::exit(exit_code_ok);
             default:
-                exit(exit_code_cmdline_error);
+                std::exit(exit_code_cmdline_error);
         }
     }
 
     int remaining_args = argc - optind;
     if (remaining_args != 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        exit(exit_code_cmdline_error);
+        std::exit(exit_code_cmdline_error);
     }
 
     auto location_index = map_factory.create_map(location_index_type);
