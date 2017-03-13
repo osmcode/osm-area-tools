@@ -10,8 +10,6 @@
 #include <getopt.h>
 #include <iostream>
 
-#include <gdalcpp.hpp>
-
 #include <osmium/area/assembler.hpp>
 #include <osmium/area/multipolygon_collector.hpp>
 #include <osmium/area/problem_reporter_ogr.hpp>
