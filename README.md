@@ -88,7 +88,7 @@ You need a C++11 compliant compiler. GCC 4.8 and later as well as clang 3.4 and
 later are known to work. You also need the following libraries:
 
     Osmium Library
-        Need at least version 2.6.1
+        Need at least version 2.12.2
         http://osmcode.org/libosmium
 
     Protozero
@@ -153,7 +153,7 @@ defaults is RelWithDebInfo.
 
 ## License
 
-Copyright (C) 2016  Jochen Topf <jochen@topf.org>
+Copyright (C) 2016-2017  Jochen Topf <jochen@topf.org>
 
 This program is available under the GNU GENERAL PUBLIC LICENSE Version 3.
 See the file LICENSE.txt for the complete text of the license.

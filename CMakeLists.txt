@@ -36,7 +36,7 @@ set(AUTHOR "Jochen Topf <jochen@topf.org>")
 #
 #-----------------------------------------------------------------------------
 
-find_package(Osmium 2.9.0 COMPONENTS io ogr geos)
+find_package(Osmium 2.12.2 COMPONENTS io ogr geos)
 include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS} include)
 
 
