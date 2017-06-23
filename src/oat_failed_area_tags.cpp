@@ -10,8 +10,16 @@
 #include <getopt.h>
 #include <iostream>
 
-#include <osmium/area/assembler.hpp>
-#include <osmium/area/multipolygon_collector.hpp>
+//#define WITH_OLD_STYLE_MP_SUPPORT
+
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
+# include <osmium/area/assembler_legacy.hpp>
+# include <osmium/area/multipolygon_manager_legacy.hpp>
+#else
+# include <osmium/area/assembler.hpp>
+# include <osmium/area/multipolygon_manager.hpp>
+#endif
+
 #include <osmium/area/problem_reporter_ogr.hpp>
 #include <osmium/geom/ogr.hpp>
 #include <osmium/index/map/dense_mem_array.hpp>
@@ -44,13 +52,13 @@ void print_help() {
               ;
 }
 
-using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembler>;
-
-void read_relations(collector_type& collector, const osmium::io::File& file) {
-    osmium::io::Reader reader{file, osmium::osm_entity_bits::relation};
-    collector.read_relations(reader);
-    reader.close();
-}
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
+using assembler_type = osmium::area::AssemblerLegacy;
+using mp_manager_type = osmium::area::MultipolygonManagerLegacy<assembler_type>;
+#else
+using assembler_type = osmium::area::Assembler;
+using mp_manager_type = osmium::area::MultipolygonManager<assembler_type>;
+#endif
 
 osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type) {
     if (location_index_type == "none") {
@@ -129,18 +137,18 @@ int main(int argc, char* argv[]) {
 
     const osmium::io::File input_file{argv[optind]};
 
-    osmium::area::Assembler::config_type assembler_config;
+    assembler_type::config_type assembler_config;
     assembler_config.create_empty_areas = true;
 
-    collector_type collector{assembler_config};
+    mp_manager_type mp_manager{assembler_config};
 
-    read_relations(collector, input_file);
+    osmium::relations::read_relations(input_file, mp_manager);
 
     osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
 
     tag_counter counter;
 
-    auto ch = collector.handler([&counter](osmium::memory::Buffer&& buffer){
+    auto mp_manager_handler = mp_manager.handler([&counter](osmium::memory::Buffer&& buffer){
         for (const auto& area : buffer.select<osmium::Area>()) {
             if (area.num_rings().first == 0) {
                 if (area.tags().has_key("name")) {
@@ -175,9 +183,9 @@ int main(int argc, char* argv[]) {
     });
 
     if (location_index_type == "none") {
-        osmium::apply(reader2, ch);
+        osmium::apply(reader2, mp_manager_handler);
     } else {
-        osmium::apply(reader2, location_handler, ch);
+        osmium::apply(reader2, location_handler, mp_manager_handler);
     }
 
     reader2.close();

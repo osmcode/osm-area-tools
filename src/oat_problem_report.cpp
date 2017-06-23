@@ -12,8 +12,16 @@
 
 #include <gdalcpp.hpp>
 
-#include <osmium/area/assembler.hpp>
-#include <osmium/area/multipolygon_collector.hpp>
+//#define WITH_OLD_STYLE_MP_SUPPORT
+
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
+# include <osmium/area/assembler_legacy.hpp>
+# include <osmium/area/multipolygon_manager_legacy.hpp>
+#else
+# include <osmium/area/assembler.hpp>
+# include <osmium/area/multipolygon_manager.hpp>
+#endif
+
 #include <osmium/area/problem_reporter_ogr.hpp>
 #include <osmium/geom/ogr.hpp>
 #include <osmium/index/map/dense_mem_array.hpp>
@@ -45,13 +53,13 @@ void print_help() {
               ;
 }
 
-using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembler>;
-
-void read_relations(collector_type& collector, const osmium::io::File& file) {
-    osmium::io::Reader reader{file, osmium::osm_entity_bits::relation};
-    collector.read_relations(reader);
-    reader.close();
-}
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
+using assembler_type = osmium::area::AssemblerLegacy;
+using mp_manager_type = osmium::area::MultipolygonManagerLegacy<assembler_type>;
+#else
+using assembler_type = osmium::area::Assembler;
+using mp_manager_type = osmium::area::MultipolygonManager<assembler_type>;
+#endif
 
 osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type) {
     if (location_index_type == "none") {
@@ -116,7 +124,7 @@ int main(int argc, char* argv[]) {
 
     const osmium::io::File input_file{argv[optind]};
 
-    osmium::area::Assembler::config_type assembler_config;
+    assembler_type::config_type assembler_config;
     assembler_config.check_roles = true;
 
     osmium::geom::OGRFactory<> factory;
@@ -124,30 +132,30 @@ int main(int argc, char* argv[]) {
     gdalcpp::Dataset dataset{"ESRI Shapefile", database_name, gdalcpp::SRS{factory.proj_string()}};
     osmium::area::ProblemReporterOGR problem_reporter{dataset};
     assembler_config.problem_reporter = &problem_reporter;
-    collector_type collector{assembler_config};
+    mp_manager_type mp_manager{assembler_config};
 
     vout << "Starting first pass (reading relations)...\n";
-    read_relations(collector, input_file);
+    osmium::relations::read_relations(input_file, mp_manager);
     vout << "First pass done.\n";
 
     vout << "Memory:\n";
-    collector.used_memory();
+    osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
     vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
     osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
 
     if (location_index_type == "none") {
-        osmium::apply(reader2, collector.handler([](osmium::memory::Buffer&&){}));
+        osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&&){}));
     } else {
-        osmium::apply(reader2, location_handler, collector.handler([](osmium::memory::Buffer&&){}));
+        osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&&){}));
     }
 
     reader2.close();
     vout << "Second pass done\n";
 
-    collector.used_memory();
+    osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
-    vout << "Stats:" << collector.stats() << '\n';
+    vout << "Stats:" << mp_manager.stats() << '\n';
 
     vout << "Estimated memory usage:\n";
     vout << "  location index: " << (location_index->used_memory() / (1024 * 1024)) << "MB\n";

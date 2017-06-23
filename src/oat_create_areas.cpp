@@ -20,8 +20,16 @@
 # include <geos/operation/valid/IsValidOp.h>
 #endif
 
-#include <osmium/area/assembler.hpp>
-#include <osmium/area/multipolygon_collector.hpp>
+//#define WITH_OLD_STYLE_MP_SUPPORT
+
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
+# include <osmium/area/assembler_legacy.hpp>
+# include <osmium/area/multipolygon_manager_legacy.hpp>
+#else
+# include <osmium/area/assembler.hpp>
+# include <osmium/area/multipolygon_manager.hpp>
+#endif
+
 #include <osmium/area/problem_reporter_ogr.hpp>
 #include <osmium/area/problem_reporter_stream.hpp>
 #include <osmium/geom/ogr.hpp>
@@ -135,9 +143,13 @@ void print_help() {
               << "  -p, --report-problems[=FILE] Report problems to file (default: stdout)\n"
               << "  -r, --show-incomplete        Show incomplete relations\n"
               << "  -R, --check-roles            Check tagged member roles\n"
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
               << "  -s, --no-new-style           Do not output new style multipolygons\n"
-              << "  -t, --keep-type-tag          Keep type tag from mp relation (default: false)\n"
               << "  -S, --no-old-style           Do not output old style multipolygons\n"
+#else
+              << "  -s, --no-new-style           Do not output multipolygons created from relations\n"
+#endif
+              << "  -t, --keep-type-tag          Keep type tag from mp relation (default: false)\n"
               << "  -w, --no-way-polygons        Do not output areas created from ways\n"
               << "  -x, --no-areas               Do not output areas (same as -s -S -w)\n"
               ;
@@ -166,23 +178,26 @@ public:
 
 }; // class DummyAssembler
 
-using collector_type = osmium::area::MultipolygonCollector<osmium::area::Assembler>;
-using collector_only = osmium::area::MultipolygonCollector<DummyAssembler>;
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
+using assembler_type = osmium::area::AssemblerLegacy;
+using mp_manager_type = osmium::area::MultipolygonManagerLegacy<assembler_type>;
+using mp_manager_only = osmium::area::MultipolygonManagerLegacy<DummyAssembler>;
+#else
+using assembler_type = osmium::area::Assembler;
+using mp_manager_type = osmium::area::MultipolygonManager<assembler_type>;
+using mp_manager_only = osmium::area::MultipolygonManager<DummyAssembler>;
+#endif
 
-template <typename TCollector>
-void read_relations(TCollector& collector, const osmium::io::File& file) {
-    osmium::io::Reader reader{file, osmium::osm_entity_bits::relation};
-    collector.read_relations(reader);
-    reader.close();
-}
-
-template <typename TCollector>
-void show_incomplete_relations(TCollector& collector) {
-    std::vector<const osmium::Relation*> incomplete_relations = collector.get_incomplete_relations();
-    if (!incomplete_relations.empty()) {
+template <typename TMPManager>
+void show_incomplete_relations(TMPManager& manager) {
+    std::vector<osmium::object_id_type> incomplete_relation_ids;
+    manager.for_each_incomplete_relation([&](const osmium::relations::RelationHandle& handle){
+        incomplete_relation_ids.push_back(handle->id());
+    });
+    if (!incomplete_relation_ids.empty()) {
         std::cerr << "Warning! Some member ways missing for these multipolygon relations:";
-        for (const auto* relation : incomplete_relations) {
-            std::cerr << ' ' << relation->id();
+        for (const auto id : incomplete_relation_ids) {
+            std::cerr << " " << id;
         }
         std::cerr << '\n';
     }
@@ -248,8 +263,8 @@ int main(int argc, char* argv[]) {
         {"show-incomplete", no_argument,       0, 'r'},
         {"check-roles",     no_argument,       0, 'R'},
         {"no-new-style",    no_argument,       0, 's'},
-        {"keep-type-tag",   no_argument,       0, 't'},
         {"no-old-style",    no_argument,       0, 'S'},
+        {"keep-type-tag",   no_argument,       0, 't'},
         {"no-way-polygons", no_argument,       0, 'w'},
         {"no-areas",        no_argument,       0, 'x'},
         {0, 0, 0, 0}
@@ -269,7 +284,7 @@ int main(int argc, char* argv[]) {
     bool show_incomplete = false;
     bool overwrite = false;
 
-    osmium::area::Assembler::config_type assembler_config;
+    assembler_type::config_type assembler_config;
     assembler_config.create_empty_areas = false;
 
     while (true) {
@@ -374,29 +389,30 @@ int main(int argc, char* argv[]) {
     bool need_locations = location_index_type != "none";
 
     if (collect_only) {
-        collector_only collector{DummyAssembler::config_type{}};
+        DummyAssembler::config_type config;
+        mp_manager_only mp_manager{config};
 
         vout << "Starting first pass (reading relations)...\n";
-        read_relations(collector, input_file);
+        osmium::relations::read_relations(input_file, mp_manager);
         vout << "First pass done.\n";
 
         vout << "Memory:\n";
-        collector.used_memory();
+        osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
         vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
         osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
         if (need_locations) {
-            osmium::apply(reader2, location_handler, collector.handler());
+            osmium::apply(reader2, location_handler, mp_manager.handler());
         } else {
-            osmium::apply(reader2, collector.handler());
+            osmium::apply(reader2, mp_manager.handler());
         }
         reader2.close();
         vout << "Second pass done\n";
 
         vout << "Memory:\n";
-        collector.used_memory();
+        osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
-        vout << "Stats:" << collector.stats() << '\n';
+        vout << "Stats:" << mp_manager.stats() << '\n';
     } else {
         std::unique_ptr<osmium::area::ProblemReporter> reporter{nullptr};
 
@@ -406,32 +422,32 @@ int main(int argc, char* argv[]) {
         }
 
         if (database_name.empty()) {
-            collector_type collector{assembler_config};
+            mp_manager_type mp_manager{assembler_config};
 
             vout << "Starting first pass (reading relations)...\n";
-            read_relations(collector, input_file);
+            osmium::relations::read_relations(input_file, mp_manager);
             vout << "First pass done.\n";
 
             vout << "Memory:\n";
-            collector.used_memory();
+            osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
             vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
             osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
             if (need_locations) {
-                osmium::apply(reader2, location_handler, collector.handler([](osmium::memory::Buffer&&) {}));
+                osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&&) {}));
             } else {
-                osmium::apply(reader2, collector.handler([](osmium::memory::Buffer&&) {}));
+                osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&&) {}));
             }
             reader2.close();
             vout << "Second pass done\n";
 
             vout << "Memory:\n";
-            collector.used_memory();
+            osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
-            vout << "Stats:" << collector.stats() << '\n';
+            vout << "Stats:" << mp_manager.stats() << '\n';
 
             if (show_incomplete) {
-                show_incomplete_relations(collector);
+                show_incomplete_relations(mp_manager);
             }
         } else {
             if (overwrite) {
@@ -454,14 +470,14 @@ int main(int argc, char* argv[]) {
                 reporter.reset(new osmium::area::ProblemReporterOGR{dataset});
             }
             assembler_config.problem_reporter = reporter.get();
-            collector_type collector{assembler_config};
+            mp_manager_type mp_manager{assembler_config};
 
             vout << "Starting first pass (reading relations)...\n";
-            read_relations(collector, input_file);
+            osmium::relations::read_relations(input_file, mp_manager);
             vout << "First pass done.\n";
 
             vout << "Memory:\n";
-            collector.used_memory();
+            osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
             vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
             osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
@@ -469,21 +485,21 @@ int main(int argc, char* argv[]) {
             if (dump_stream) {
                 osmium::handler::Dump dump_handler{dump_stream.get()};
                 if (need_locations) {
-                    osmium::apply(reader2, location_handler, collector.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
+                    osmium::apply(reader2, location_handler, mp_manager.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
                         osmium::apply(buffer, dump_handler, output);
                     }));
                 } else {
-                    osmium::apply(reader2, collector.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
+                    osmium::apply(reader2, mp_manager.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
                         osmium::apply(buffer, dump_handler, output);
                     }));
                 }
             } else {
                 if (need_locations) {
-                    osmium::apply(reader2, location_handler, collector.handler([&output](osmium::memory::Buffer&& buffer) {
+                    osmium::apply(reader2, location_handler, mp_manager.handler([&output](osmium::memory::Buffer&& buffer) {
                         osmium::apply(buffer, output);
                     }));
                 } else {
-                    osmium::apply(reader2, collector.handler([&output](osmium::memory::Buffer&& buffer) {
+                    osmium::apply(reader2, mp_manager.handler([&output](osmium::memory::Buffer&& buffer) {
                         osmium::apply(buffer, output);
                     }));
                 }
@@ -496,12 +512,12 @@ int main(int argc, char* argv[]) {
                 reporter.reset();
             }
 
-            collector.used_memory();
+            osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
-            vout << "Stats:" << collector.stats() << '\n';
+            vout << "Stats:" << mp_manager.stats() << '\n';
 
             if (show_incomplete) {
-                show_incomplete_relations(collector);
+                show_incomplete_relations(mp_manager);
             }
         }
     }
