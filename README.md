@@ -92,9 +92,9 @@ later are known to work. You also need the following libraries:
         http://osmcode.org/libosmium
 
     Protozero
+        Need at least version 1.5.1
         https://github.com/mapbox/protozero
-        Debian/Ubuntu: protozero
-        Also included in the libosmium repository.
+        Debian/Ubuntu: libprotozero-dev
 
     Utfcpp
         http://utfcpp.sourceforge.net/
