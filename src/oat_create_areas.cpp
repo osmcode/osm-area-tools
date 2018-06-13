@@ -133,7 +133,7 @@ void print_help() {
               << "  -C, --collect-only           Only collect data, don't assemble areas\n"
               << "  -f, --only-invalid           Filter out valid geometries\n"
               << "  -d, --debug[=LEVEL]          Set area assembler debug level\n"
-              << "  -D, --dump-areas[=FILE]      Dump areas to file (default: stdout)\n"
+              << "  -D, --dump-areas[=FILE]      Dump areas to file (default: stdout, also needs -o)\n"
               << "  -e, --empty-areas            Create empty areas for broken geometries\n"
               << "  -h, --help                   This help message\n"
               << "  -i, --index=INDEX_TYPE       Set index type for location index (default: sparse_mmap_array)\n"
