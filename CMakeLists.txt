@@ -62,9 +62,7 @@ endif()
 #  Compiler and Linker flags
 #
 #-----------------------------------------------------------------------------
-set(USUAL_COMPILE_OPTIONS "-O3 -g -fno-omit-frame-pointer")
-
-set(CMAKE_CXX_FLAGS_DEV "${USUAL_COMPILE_OPTIONS}"
+set(CMAKE_CXX_FLAGS_DEV "-O3 -g -fno-omit-frame-pointer"
     CACHE STRING "Flags used by the compiler during developer builds."
     FORCE)
 
@@ -76,7 +74,7 @@ mark_as_advanced(
     CMAKE_EXE_LINKER_FLAGS_DEV
 )
 
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${USUAL_COMPILE_OPTIONS}"
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG"
     CACHE STRING "Flags used by the compiler during RELWITHDEBINFO builds."
     FORCE)
 
