@@ -37,6 +37,7 @@
 #include <osmium/index/map/dense_mem_array.hpp>
 #include <osmium/index/map/dense_mmap_array.hpp>
 #include <osmium/index/map/dummy.hpp>
+#include <osmium/index/map/flex_mem.hpp>
 #include <osmium/index/map/sparse_mem_array.hpp>
 #include <osmium/index/map/sparse_mmap_array.hpp>
 #include <osmium/index/node_locations_map.hpp>
@@ -276,7 +277,7 @@ int main(int argc, char* argv[]) {
 
     std::string database_name;
 
-    std::string location_index_type{"sparse_mmap_array"};
+    std::string location_index_type{"flex_mem"};
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     optional_output dump_stream;
