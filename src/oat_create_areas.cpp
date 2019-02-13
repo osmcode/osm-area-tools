@@ -151,7 +151,11 @@ void print_help() {
 #endif
               << "  -t, --keep-type-tag          Keep type tag from mp relation (default: false)\n"
               << "  -w, --no-way-polygons        Do not output areas created from ways\n"
+#ifdef WITH_OLD_STYLE_MP_SUPPORT
               << "  -x, --no-areas               Do not output areas (same as -s -S -w)\n"
+#else
+              << "  -x, --no-areas               Do not output areas (same as -s -w)\n"
+#endif
               ;
 }
 
