@@ -137,7 +137,7 @@ void print_help() {
               << "  -D, --dump-areas[=FILE]      Dump areas to file (default: stdout, also needs -o)\n"
               << "  -e, --empty-areas            Create empty areas for broken geometries\n"
               << "  -h, --help                   This help message\n"
-              << "  -i, --index=INDEX_TYPE       Set index type for location index (default: sparse_mmap_array)\n"
+              << "  -i, --index=INDEX_TYPE       Set index type for location index (default: flex_mem)\n"
               << "  -I, --show-index-types       Show available index types for location index\n"
               << "  -o, --output=DBNAME          Database name\n"
               << "  -O, --overwrite              Overwrite existing database\n"
