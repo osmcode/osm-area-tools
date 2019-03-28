@@ -43,14 +43,13 @@ using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;
 
 REGISTER_MAP(osmium::unsigned_object_id_type, osmium::Location, osmium::index::map::Dummy, none)
 
-void print_help() {
+static void print_help() {
     std::cout << "oat_problem_report [OPTIONS] OSMFILE\n\n"
               << "Build multipolygons from OSMFILE and report problems in shapefiles.\n\n"
               << "Options:\n"
               << "  -h, --help                   This help message\n"
-              << "  -i, --index=INDEX_TYPE       Set index type for location index (default: sparse_mmap_array)\n"
-              << "  -I, --show-index-types       Show available index types for location index\n"
-              ;
+              << "  -i, --index=INDEX_TYPE       Set index type for location index (default: flex_mem)\n"
+              << "  -I, --show-index-types       Show available index types for location index\n";
 }
 
 #ifdef WITH_OLD_STYLE_MP_SUPPORT
@@ -61,7 +60,7 @@ using assembler_type = osmium::area::Assembler;
 using mp_manager_type = osmium::area::MultipolygonManager<assembler_type>;
 #endif
 
-osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type) {
+static osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type) {
     if (location_index_type == "none") {
         return osmium::osm_entity_bits::way;
     } else {

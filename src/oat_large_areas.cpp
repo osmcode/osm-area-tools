@@ -100,7 +100,7 @@ public:
 
 }; // class LargeAreasHandler
 
-void print_help() {
+static void print_help() {
     std::cout << "oat_large_areas [OPTIONS] OSMFILE\n\n"
               << "Find largest area relations in OSMFILE.\n\n"
               << "Options:\n"

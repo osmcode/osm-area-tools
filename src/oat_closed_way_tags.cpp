@@ -49,7 +49,7 @@ static osmium::tags::KeyValueFilter linestring_tags{false};
 static osmium::tags::KeyValueFilter polygon_tags{false};
 static osmium::tags::KeyFilter uninteresting_tags{true};
 
-category classify(const osmium::TagList& tags) {
+static category classify(const osmium::TagList& tags) {
     if (tags.empty()) {
         return category::notags;
     }
@@ -86,7 +86,7 @@ category classify(const osmium::TagList& tags) {
     return category::unknown;
 }
 
-void init_taglists() {
+static void init_taglists() {
     linestring_tags.add(true, "highway");
     linestring_tags.add(true, "leisure", "slipway");
     linestring_tags.add(false, "waterway", "riverbank");
