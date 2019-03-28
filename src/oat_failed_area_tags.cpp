@@ -25,6 +25,7 @@
 #include <osmium/index/map/dense_mem_array.hpp>
 #include <osmium/index/map/dense_mmap_array.hpp>
 #include <osmium/index/map/dummy.hpp>
+#include <osmium/index/map/flex_mem.hpp>
 #include <osmium/index/map/sparse_mem_array.hpp>
 #include <osmium/index/map/sparse_mmap_array.hpp>
 #include <osmium/index/node_locations_map.hpp>
@@ -47,7 +48,7 @@ void print_help() {
               << "Build areas from OSMFILE and count tags where area assembly failed.\n\n"
               << "Options:\n"
               << "  -h, --help                   This help message\n"
-              << "  -i, --index=INDEX_TYPE       Set index type for location index (default: sparse_mmap_array)\n"
+              << "  -i, --index=INDEX_TYPE       Set index type for location index (default: flex_mem)\n"
               << "  -I, --show-index-types       Show available index types for location index\n"
               ;
 }
@@ -94,7 +95,7 @@ int main(int argc, char* argv[]) {
         {0, 0, 0, 0}
     };
 
-    std::string location_index_type{"sparse_mmap_array"};
+    std::string location_index_type{"flex_mem"};
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     while (true) {
