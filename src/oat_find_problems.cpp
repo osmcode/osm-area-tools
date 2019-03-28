@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    int remaining_args = argc - optind;
+    const int remaining_args = argc - optind;
     if (remaining_args != 1) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
         std::exit(exit_code_cmdline_error);
@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
         for (auto it = buffer.begin<osmium::Relation>(); it != buffer.end<osmium::Relation>(); ++it) {
             const char* type = it->tags().get_value_by_key("type");
             if (type) {
-                char mptype = mp_type(type);
+                const char mptype = mp_type(type);
                 if (mptype != ' ' && !check_relation(*it, mptype, error_count)) {
                     writer(*it);
                 }

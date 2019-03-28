@@ -69,8 +69,8 @@ static category classify(const osmium::TagList& tags) {
         }
     }
 
-    bool any_l = osmium::tags::match_any_of(tags, linestring_tags);
-    bool any_p = osmium::tags::match_any_of(tags, polygon_tags);
+    const bool any_l = osmium::tags::match_any_of(tags, linestring_tags);
+    const bool any_p = osmium::tags::match_any_of(tags, polygon_tags);
 
     if (any_l) {
         if (any_p) {
@@ -164,11 +164,11 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<osmium::io::Writer>(new osmium::io::Writer{output_prefix + "-both.osm.pbf",       header, overwrite})
     }};
 
-    auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
+    const auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
 
     for (const osmium::Way& way : ways) {
         if (way.is_closed()) {
-            auto way_category = classify(way.tags());
+            const auto way_category = classify(way.tags());
             ++counter[way_category];
             (*writers[way_category])(way);
         }
