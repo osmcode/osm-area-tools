@@ -36,7 +36,8 @@ Osmium/OSM Area Tools uses the following naming conventions:
 
 ## Programs
 
-[![Build Status](https://travis-ci.org/osmcode/osm-area-tools.svg?branch=master)](https://travis-ci.org/osmcode/osm-area-tools)
+[![Build Status](https://github.com/osmcode/osm-area-tools/workflows/CI/badge.svg?branch=master)](https://github.com/osmcode/osm-area-tools/actions)
+
 
 ### `oat_closed_way_filter`
 
