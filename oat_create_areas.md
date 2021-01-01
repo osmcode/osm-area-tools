@@ -83,7 +83,8 @@ Assembles areas from their parts and optionally checks them for validity.
 
 The following index types are supported:
 
-* `sparse_mmap_array`: Use for small and medium sized extracts (default).
+* `flex_mem`: Works for any file size (default).
+* `sparse_mmap_array`: Use for small and medium sized extracts.
 * `sparse_mem_array`: Use for small and medium sized extracts.
 * `dense_mmap_array`: Use for very large extracts and planet files.
 * `dense_mem_array`: Use for very large extracts and planet files.
