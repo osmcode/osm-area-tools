@@ -89,18 +89,13 @@ You need a C++11 compliant compiler. GCC 4.8 and later as well as clang 3.4 and
 later are known to work. You also need the following libraries:
 
     Osmium Library
-        Need at least version 2.12.2
-        http://osmcode.org/libosmium
+        Need at least version 2.15.4
+        https://osmcode.org/libosmium
 
     Protozero
-        Need at least version 1.5.1
+        Need at least version 1.6.3
         https://github.com/mapbox/protozero
         Debian/Ubuntu: libprotozero-dev
-
-    Utfcpp
-        http://utfcpp.sourceforge.net/
-        Debian/Ubuntu: libutfcpp-dev
-        Also included in the libosmium repository.
 
     gdalcpp
         https://github.com/joto/gdalcpp
@@ -154,7 +149,7 @@ defaults is RelWithDebInfo.
 
 ## License
 
-Copyright (C) 2016-2019  Jochen Topf <jochen@topf.org>
+Copyright (C) 2016-2021  Jochen Topf <jochen@topf.org>
 
 This program is available under the GNU GENERAL PUBLIC LICENSE Version 3.
 See the file LICENSE.txt for the complete text of the license.
