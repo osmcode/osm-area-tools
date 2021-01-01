@@ -414,7 +414,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<osmium::area::ProblemReporter> reporter{nullptr};
 
         if (problem_stream) {
-            reporter.reset(new osmium::area::ProblemReporterStream{problem_stream.get()});
+            reporter = std::make_unique<osmium::area::ProblemReporterStream>(problem_stream.get());
             assembler_config.problem_reporter = reporter.get();
         }
 
@@ -464,7 +464,7 @@ int main(int argc, char* argv[]) {
             output.set_only_invalid(only_invalid);
 
             if (!problem_stream) {
-                reporter.reset(new osmium::area::ProblemReporterOGR{dataset});
+                reporter = std::make_unique<osmium::area::ProblemReporterOGR>(dataset);
             }
             assembler_config.problem_reporter = reporter.get();
             mp_manager_type mp_manager{assembler_config};

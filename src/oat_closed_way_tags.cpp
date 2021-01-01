@@ -159,11 +159,11 @@ int main(int argc, char* argv[]) {
 
     std::array<uint32_t, 5> counter = {{0, 0, 0, 0, 0}};
     std::array<std::unique_ptr<osmium::io::Writer>, 5> writers {{
-        std::unique_ptr<osmium::io::Writer>(new osmium::io::Writer{output_prefix + "-unknown.osm.pbf",    header, overwrite}),
-        std::unique_ptr<osmium::io::Writer>(new osmium::io::Writer{output_prefix + "-notags.osm.pbf",     header, overwrite}),
-        std::unique_ptr<osmium::io::Writer>(new osmium::io::Writer{output_prefix + "-linestring.osm.pbf", header, overwrite}),
-        std::unique_ptr<osmium::io::Writer>(new osmium::io::Writer{output_prefix + "-polygon.osm.pbf",    header, overwrite}),
-        std::unique_ptr<osmium::io::Writer>(new osmium::io::Writer{output_prefix + "-both.osm.pbf",       header, overwrite})
+        std::make_unique<osmium::io::Writer>(output_prefix + "-unknown.osm.pbf",    header, overwrite),
+        std::make_unique<osmium::io::Writer>(output_prefix + "-notags.osm.pbf",     header, overwrite),
+        std::make_unique<osmium::io::Writer>(output_prefix + "-linestring.osm.pbf", header, overwrite),
+        std::make_unique<osmium::io::Writer>(output_prefix + "-polygon.osm.pbf",    header, overwrite),
+        std::make_unique<osmium::io::Writer>(output_prefix + "-both.osm.pbf",       header, overwrite)
     }};
 
     const auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
