@@ -241,14 +241,6 @@ public:
 
 }; // class optional_output
 
-osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type) {
-    if (location_index_type == "none") {
-        return osmium::osm_entity_bits::way;
-    } else {
-        return osmium::osm_entity_bits::way | osmium::osm_entity_bits::node;
-    }
-}
-
 int main(int argc, char* argv[]) {
     osmium::util::VerboseOutput vout{true};
 
