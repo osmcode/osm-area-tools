@@ -6,29 +6,13 @@
 #
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+project(osmium-area VERSION 0.0.1)
+
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-
-#-----------------------------------------------------------------------------
-#
-#  Project version
-#
-#-----------------------------------------------------------------------------
-
-project(osmium-area)
-
-set(OAT_VERSION_MAJOR 0)
-set(OAT_VERSION_MINOR 0)
-set(OAT_VERSION_PATCH 1)
-
-set(OAT_VERSION
-    ${OAT_VERSION_MAJOR}.${OAT_VERSION_MINOR}.${OAT_VERSION_PATCH})
-
-set(AUTHOR "Jochen Topf <jochen@topf.org>")
-
 
 #-----------------------------------------------------------------------------
 #
@@ -38,23 +22,6 @@ set(AUTHOR "Jochen Topf <jochen@topf.org>")
 
 find_package(Osmium 2.15.4 COMPONENTS io ogr geos)
 include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS} include)
-
-
-#-----------------------------------------------------------------------------
-#
-#  Decide which C++ version to use (Minimum/default: C++11).
-#
-#-----------------------------------------------------------------------------
-if(NOT MSVC)
-    if(NOT USE_CPP_VERSION)
-        set(USE_CPP_VERSION c++11)
-    endif()
-    message(STATUS "Use C++ version: ${USE_CPP_VERSION}")
-    # following only available from cmake 2.8.12:
-    #   add_compile_options(-std=${USE_CPP_VERSION})
-    # so using this instead:
-    add_definitions(-std=${USE_CPP_VERSION})
-endif()
 
 
 #-----------------------------------------------------------------------------
