@@ -115,7 +115,7 @@ static void init_taglists() {
 int main(int argc, char* argv[]) {
     init_taglists();
 
-    std::string output_prefix{"close-way-tags"};
+    std::string output_prefix{"closed-way-tags"};
     auto overwrite = osmium::io::overwrite::no;
 
     static const struct option long_options[] = {
