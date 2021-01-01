@@ -89,16 +89,16 @@ char mp_type(const char* type) {
 
 int main(int argc, char* argv[]) {
     static const struct option long_options[] = {
-        {"help",          no_argument,       0, 'h'},
-        {"output-format", required_argument, 0, 'f'},
-        {"output",        required_argument, 0, 'o'},
-        {0, 0, 0, 0}
+        {"help",          no_argument,       nullptr, 'h'},
+        {"output-format", required_argument, nullptr, 'f'},
+        {"output",        required_argument, nullptr, 'o'},
+        {nullptr, 0, nullptr, 0}
     };
 
     std::string output;
     std::string output_format;
     while (true) {
-        int c = getopt_long(argc, argv, "hf:o:", long_options, 0);
+        int c = getopt_long(argc, argv, "hf:o:", long_options, nullptr);
         if (c == -1) {
             break;
         }

@@ -253,26 +253,26 @@ int main(int argc, char* argv[]) {
     osmium::util::VerboseOutput vout{true};
 
     static const struct option long_options[] = {
-        {"check",           no_argument,       0, 'c'},
-        {"collect-only",    no_argument,       0, 'C'},
-        {"only-invalid",    no_argument,       0, 'f'},
-        {"debug",           optional_argument, 0, 'd'},
-        {"dump-areas",      optional_argument, 0, 'D'},
-        {"empty-areas",     no_argument,       0, 'e'},
-        {"help",            no_argument,       0, 'h'},
-        {"index",           required_argument, 0, 'i'},
-        {"show-index",      no_argument,       0, 'I'},
-        {"output",          required_argument, 0, 'o'},
-        {"overwrite",       no_argument,       0, 'O'},
-        {"report-problems", optional_argument, 0, 'p'},
-        {"show-incomplete", no_argument,       0, 'r'},
-        {"check-roles",     no_argument,       0, 'R'},
-        {"no-new-style",    no_argument,       0, 's'},
-        {"no-old-style",    no_argument,       0, 'S'},
-        {"keep-type-tag",   no_argument,       0, 't'},
-        {"no-way-polygons", no_argument,       0, 'w'},
-        {"no-areas",        no_argument,       0, 'x'},
-        {0, 0, 0, 0}
+        {"check",           no_argument,       nullptr, 'c'},
+        {"collect-only",    no_argument,       nullptr, 'C'},
+        {"only-invalid",    no_argument,       nullptr, 'f'},
+        {"debug",           optional_argument, nullptr, 'd'},
+        {"dump-areas",      optional_argument, nullptr, 'D'},
+        {"empty-areas",     no_argument,       nullptr, 'e'},
+        {"help",            no_argument,       nullptr, 'h'},
+        {"index",           required_argument, nullptr, 'i'},
+        {"show-index",      no_argument,       nullptr, 'I'},
+        {"output",          required_argument, nullptr, 'o'},
+        {"overwrite",       no_argument,       nullptr, 'O'},
+        {"report-problems", optional_argument, nullptr, 'p'},
+        {"show-incomplete", no_argument,       nullptr, 'r'},
+        {"check-roles",     no_argument,       nullptr, 'R'},
+        {"no-new-style",    no_argument,       nullptr, 's'},
+        {"no-old-style",    no_argument,       nullptr, 'S'},
+        {"keep-type-tag",   no_argument,       nullptr, 't'},
+        {"no-way-polygons", no_argument,       nullptr, 'w'},
+        {"no-areas",        no_argument,       nullptr, 'x'},
+        {nullptr, 0, nullptr, 0}
     };
 
     std::string database_name;
@@ -293,7 +293,7 @@ int main(int argc, char* argv[]) {
     assembler_config.create_empty_areas = false;
 
     while (true) {
-        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, 0);
+        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, nullptr);
         if (c == -1) {
             break;
         }

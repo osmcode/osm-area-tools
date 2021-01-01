@@ -118,14 +118,14 @@ int main(int argc, char* argv[]) {
     auto overwrite = osmium::io::overwrite::no;
 
     static const struct option long_options[] = {
-        {"help",                no_argument, 0, 'h'},
-        {"output-prefix", required_argument, 0, 'o'},
-        {"overwrite",           no_argument, 0, 'O'},
-        {0, 0, 0, 0}
+        {"help",                no_argument, nullptr, 'h'},
+        {"output-prefix", required_argument, nullptr, 'o'},
+        {"overwrite",           no_argument, nullptr, 'O'},
+        {nullptr, 0, nullptr, 0}
     };
 
     while (1) {
-        int c = getopt_long(argc, argv, "ho:O", long_options, 0);
+        int c = getopt_long(argc, argv, "ho:O", long_options, nullptr);
         if (c == -1)
             break;
 

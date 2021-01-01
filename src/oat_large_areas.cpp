@@ -113,18 +113,18 @@ static void print_help() {
 
 int main(int argc, char* argv[]) {
     static const struct option long_options[] = {
-        {"help",      no_argument,       0, 'h'},
-        {"min-nodes", required_argument, 0, 'n'},
-        {"min-ways",  required_argument, 0, 'w'},
-        {"output",    required_argument, 0, 'o'},
-        {0, 0, 0, 0}
+        {"help",      no_argument,       nullptr, 'h'},
+        {"min-nodes", required_argument, nullptr, 'n'},
+        {"min-ways",  required_argument, nullptr, 'w'},
+        {"output",    required_argument, nullptr, 'o'},
+        {nullptr, 0, nullptr, 0}
     };
 
     std::size_t min_ways = 1000;
     std::size_t min_nodes = 100000;
     std::string output{"large_areas"};
     while (true) {
-        int c = getopt_long(argc, argv, "hn:o:w:", long_options, 0);
+        int c = getopt_long(argc, argv, "hn:o:w:", long_options, nullptr);
         if (c == -1) {
             break;
         }

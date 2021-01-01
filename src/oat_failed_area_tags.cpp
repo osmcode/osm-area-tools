@@ -89,17 +89,17 @@ int main(int argc, char* argv[]) {
     std::ios_base::sync_with_stdio(false);
 
     static const struct option long_options[] = {
-        {"help",       no_argument,       0, 'h'},
-        {"index",      required_argument, 0, 'i'},
-        {"show-index", no_argument,       0, 'I'},
-        {0, 0, 0, 0}
+        {"help",       no_argument,       nullptr, 'h'},
+        {"index",      required_argument, nullptr, 'i'},
+        {"show-index", no_argument,       nullptr, 'I'},
+        {nullptr, 0, nullptr, 0}
     };
 
     std::string location_index_type{"flex_mem"};
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     while (true) {
-        int c = getopt_long(argc, argv, "hi:I", long_options, 0);
+        int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
         if (c == -1) {
             break;
         }
