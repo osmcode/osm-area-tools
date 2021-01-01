@@ -6,6 +6,7 @@
 
 *****************************************************************************/
 
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -44,7 +45,7 @@ class StatsHandler : public osmium::handler::Handler {
     uint32_t m_roles_empty = 0;
     uint32_t m_roles_other = 0;
 
-    uint32_t m_nodes_in_ways_histogram[2001];
+    std::array<uint32_t, 2001> m_nodes_in_ways_histogram{};
 
     std::unordered_map<uint32_t, uint32_t> m_nodes_in_ways;
 
@@ -114,10 +115,6 @@ class StatsHandler : public osmium::handler::Handler {
 
 public:
 
-    StatsHandler() {
-        std::fill(std::begin(m_nodes_in_ways_histogram), std::end(m_nodes_in_ways_histogram), 0);
-    }
-
     void way(const osmium::Way& way) {
         ++m_ways_all;
 
@@ -138,10 +135,10 @@ public:
         if (!type) {
             return;
         }
-        if (!strcmp(type, "multipolygon")) {
+        if (!std::strcmp(type, "multipolygon")) {
             ++m_relations_type_multipolygon;
             mp_relation(relation);
-        } else if (!strcmp(type, "boundary")) {
+        } else if (!std::strcmp(type, "boundary")) {
             ++m_relations_type_boundary;
             mp_relation(relation);
         }
@@ -149,7 +146,7 @@ public:
 
     void write_stats_to_db(const std::string& database_name) const {
         unlink(database_name.c_str());
-        Sqlite::Database db{database_name, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE};
+        Sqlite::Database db{database_name, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE}; // NOLINT(hicpp-signed-bitwise)
 
         db.exec("CREATE TABLE stats (key VARCHAR, value INT64 DEFAULT 0);");
         db.exec("CREATE TABLE histogram_nodes_in_ways (value INTEGER, num INTEGER);");

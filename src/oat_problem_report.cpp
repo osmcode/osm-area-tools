@@ -24,6 +24,7 @@
 
 #include <osmium/area/problem_reporter_ogr.hpp>
 #include <osmium/geom/ogr.hpp>
+#include <osmium/handler/node_locations_for_ways.hpp>
 #include <osmium/index/map/dense_mem_array.hpp>
 #include <osmium/index/map/dense_mmap_array.hpp>
 #include <osmium/index/map/dummy.hpp>
@@ -31,7 +32,6 @@
 #include <osmium/index/map/sparse_mem_array.hpp>
 #include <osmium/index/map/sparse_mmap_array.hpp>
 #include <osmium/index/node_locations_map.hpp>
-#include <osmium/handler/node_locations_for_ways.hpp>
 #include <osmium/io/any_input.hpp>
 #include <osmium/util/memory.hpp>
 #include <osmium/util/verbose_output.hpp>
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     while (true) {
-        int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
         if (c == -1) {
             break;
         }
@@ -137,9 +137,9 @@ int main(int argc, char* argv[]) {
     osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
 
     if (location_index_type == "none") {
-        osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&&){}));
+        osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/){}));
     } else {
-        osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&&){}));
+        osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/){}));
     }
 
     reader2.close();

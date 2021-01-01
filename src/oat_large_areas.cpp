@@ -36,13 +36,13 @@ class LargeAreasHandler : public osmium::handler::Handler {
 
     static std::pair<const char*, const char*> get_subtype(const osmium::TagList& tags) {
         for (const osmium::Tag& tag : tags) {
-            if (!strcmp(tag.key(), "boundary")  ||
-                !strcmp(tag.key(), "land_area") ||
-                !strcmp(tag.key(), "landuse")   ||
-                !strcmp(tag.key(), "leisure")   ||
-                !strcmp(tag.key(), "natural")   ||
-                !strcmp(tag.key(), "place")     ||
-                !strcmp(tag.key(), "waterway")) {
+            if (!std::strcmp(tag.key(), "boundary")  ||
+                !std::strcmp(tag.key(), "land_area") ||
+                !std::strcmp(tag.key(), "landuse")   ||
+                !std::strcmp(tag.key(), "leisure")   ||
+                !std::strcmp(tag.key(), "natural")   ||
+                !std::strcmp(tag.key(), "place")     ||
+                !std::strcmp(tag.key(), "waterway")) {
                 return std::make_pair(tag.key(), tag.value());
             }
         }
@@ -67,7 +67,7 @@ public:
         if (!type) {
             return;
         }
-        if (!strcmp(type, "multipolygon") || !strcmp(type, "boundary")) {
+        if (!std::strcmp(type, "multipolygon") || !std::strcmp(type, "boundary")) {
             std::size_t num_ways = 0;
             std::size_t num_nodes = 0;
             for (const auto& member : relation.members()) {
@@ -155,7 +155,7 @@ int main(int argc, char* argv[]) {
 
     osmium::io::Writer writer{output + ".osm.pbf"};
 
-    Sqlite::Database db{output + ".db", SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE};
+    Sqlite::Database db{output + ".db", SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE}; // NOLINT(hicpp-signed-bitwise)
     db.exec("CREATE TABLE areas (relation_id INTEGER, num_ways INTEGER, num_nodes INTEGER, num_tags INTEGER, type VARCHAR, key VARCHAR, value VARCHAR, name VARCHAR, name_en VARCHAR);");
     Sqlite::Statement insert_into_areas{db, "INSERT INTO areas (relation_id, num_ways, num_nodes, num_tags, type, key, value, name, name_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"};
 

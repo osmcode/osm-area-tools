@@ -42,10 +42,11 @@ int main(int argc, char* argv[]) {
         {nullptr, 0, nullptr, 0}
     };
 
-    while (1) {
-        int c = getopt_long(argc, argv, "ho:O", long_options, nullptr);
-        if (c == -1)
+    while (true) {
+        const int c = getopt_long(argc, argv, "ho:O", long_options, nullptr);
+        if (c == -1) {
             break;
+        }
 
         switch (c) {
             case 'h':
@@ -77,7 +78,7 @@ int main(int argc, char* argv[]) {
     osmium::io::Writer writer{output_filename, header, overwrite};
     auto output_it = osmium::io::make_output_iterator(writer);
 
-    auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
+    const auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
 
     std::copy_if(ways.cbegin(), ways.cend(), output_it, [](const osmium::Way& way) {
         return way.is_closed();

@@ -64,7 +64,8 @@ static category classify(const osmium::TagList& tags) {
     if (area) {
         if (!std::strcmp(area, "yes")) {
             return category::polygon;
-        } else if (!std::strcmp(area, "no")) {
+        }
+        if (!std::strcmp(area, "no")) {
             return category::linestring;
         }
     }
@@ -124,10 +125,11 @@ int main(int argc, char* argv[]) {
         {nullptr, 0, nullptr, 0}
     };
 
-    while (1) {
-        int c = getopt_long(argc, argv, "ho:O", long_options, nullptr);
-        if (c == -1)
+    while (true) {
+        const int c = getopt_long(argc, argv, "ho:O", long_options, nullptr);
+        if (c == -1) {
             break;
+        }
 
         switch (c) {
             case 'h':

@@ -34,6 +34,7 @@
 #include <osmium/area/problem_reporter_stream.hpp>
 #include <osmium/geom/ogr.hpp>
 #include <osmium/handler/dump.hpp>
+#include <osmium/handler/node_locations_for_ways.hpp>
 #include <osmium/index/map/dense_mem_array.hpp>
 #include <osmium/index/map/dense_mmap_array.hpp>
 #include <osmium/index/map/dummy.hpp>
@@ -41,7 +42,6 @@
 #include <osmium/index/map/sparse_mem_array.hpp>
 #include <osmium/index/map/sparse_mmap_array.hpp>
 #include <osmium/index/node_locations_map.hpp>
-#include <osmium/handler/node_locations_for_ways.hpp>
 #include <osmium/io/any_input.hpp>
 #include <osmium/util/memory.hpp>
 #include <osmium/util/verbose_output.hpp>
@@ -168,13 +168,13 @@ public:
 
     struct config_type {};
 
-    explicit DummyAssembler(const config_type&) {
+    explicit DummyAssembler(const config_type& /*config*/) {
     }
 
-    void operator()(const osmium::Way&, osmium::memory::Buffer&) {
+    void operator()(const osmium::Way& /*way*/, osmium::memory::Buffer& /*out_buffer*/) {
     }
 
-    void operator()(const osmium::Relation&, const std::vector<const osmium::Way*>&, osmium::memory::Buffer&) {
+    void operator()(const osmium::Relation& /*relation*/, const std::vector<const osmium::Way*>& /*members*/, osmium::memory::Buffer& /*out_buffer*/) {
     }
 
     const osmium::area::area_stats& stats() const noexcept {
@@ -230,7 +230,7 @@ public:
         stream = &std::cout;
     }
 
-    operator bool() const noexcept {
+    explicit operator bool() const noexcept {
         return !!stream;
     }
 
@@ -285,7 +285,7 @@ int main(int argc, char* argv[]) {
     assembler_config.create_empty_areas = false;
 
     while (true) {
-        int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, nullptr);
         if (c == -1) {
             break;
         }
@@ -383,7 +383,7 @@ int main(int argc, char* argv[]) {
 
     const osmium::io::File input_file{argv[optind]};
 
-    bool need_locations = location_index_type != "none";
+    const bool need_locations = location_index_type != "none";
 
     if (collect_only) {
         DummyAssembler::config_type config;
@@ -431,9 +431,9 @@ int main(int argc, char* argv[]) {
             vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
             osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
             if (need_locations) {
-                osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&&) {}));
+                osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/) {}));
             } else {
-                osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&&) {}));
+                osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/) {}));
             }
             reader2.close();
             vout << "Second pass done\n";

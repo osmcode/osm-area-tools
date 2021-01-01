@@ -22,6 +22,7 @@
 
 #include <osmium/area/problem_reporter_ogr.hpp>
 #include <osmium/geom/ogr.hpp>
+#include <osmium/handler/node_locations_for_ways.hpp>
 #include <osmium/index/map/dense_mem_array.hpp>
 #include <osmium/index/map/dense_mmap_array.hpp>
 #include <osmium/index/map/dummy.hpp>
@@ -29,7 +30,6 @@
 #include <osmium/index/map/sparse_mem_array.hpp>
 #include <osmium/index/map/sparse_mmap_array.hpp>
 #include <osmium/index/node_locations_map.hpp>
-#include <osmium/handler/node_locations_for_ways.hpp>
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
 #include <osmium/util/memory.hpp>
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
     const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
     while (true) {
-        int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
         if (c == -1) {
             break;
         }

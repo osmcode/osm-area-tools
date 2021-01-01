@@ -44,7 +44,7 @@ bool check_relation(const osmium::Relation& relation, char mptype, int& error_co
         // way members should have role "outer" or "inner" or be empty
         if (member.type() == osmium::item_type::way) {
             const char* r = member.role();
-            if (*r != '\0' && std::strcmp(r, "outer") && std::strcmp(r, "inner")) {
+            if (*r != '\0' && (std::strcmp(r, "outer") != 0) && (std::strcmp(r, "inner") != 0)) {
                 std::cout << 'r' << relation.id() << " wrong role '" << r << "'\n";
                 ++error_count;
                 okay = false;
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     std::string output;
     std::string output_format;
     while (true) {
-        int c = getopt_long(argc, argv, "hf:o:", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "hf:o:", long_options, nullptr);
         if (c == -1) {
             break;
         }
@@ -133,12 +133,12 @@ int main(int argc, char* argv[]) {
 
     int error_count = 0;
     while (const osmium::memory::Buffer buffer = reader.read()) {
-        for (auto it = buffer.begin<osmium::Relation>(); it != buffer.end<osmium::Relation>(); ++it) {
-            const char* type = it->tags().get_value_by_key("type");
+        for (const auto &relation : buffer.select<osmium::Relation>()) {
+            const char* type = relation.tags().get_value_by_key("type");
             if (type) {
                 const char mptype = mp_type(type);
-                if (mptype != ' ' && !check_relation(*it, mptype, error_count)) {
-                    writer(*it);
+                if (mptype != ' ' && !check_relation(relation, mptype, error_count)) {
+                    writer(relation);
                 }
             }
         }
