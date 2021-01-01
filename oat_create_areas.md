@@ -98,7 +98,7 @@ other systems use the `*_mem_*` versions.
 
 ## Viewing in QGIS
 
-You can view the result of this program in [QGIS](http://www.qgis.org/) using
+You can view the result of this program in [QGIS](https://www.qgis.org/) using
 the `area-errors.qgs` QGIS project file. You have to name the output
 `areas.db` and it has to be in the directory you start QGIS in.
 

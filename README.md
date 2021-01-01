@@ -106,28 +106,28 @@ later are known to work. You also need the following libraries:
         Debian/Ubuntu: libbz2-dev
 
     CMake (for building)
-        http://www.cmake.org/
+        https://cmake.org/
         Debian/Ubuntu: cmake
 
     Expat (for parsing XML files)
-        http://expat.sourceforge.net/
+        https://libexpat.github.io/
         Debian/Ubuntu: libexpat1-dev
         openSUSE: libexpat-devel
 
     GDAL/OGR
-        http://gdal.org/
+        https://gdal.org/
         Debian/Ubuntu: libgdal-dev
 
     GEOS
-        http://trac.osgeo.org/geos/
+        https://trac.osgeo.org/geos/
         Debian/Ubuntu: libgeos++-dev
 
     Sqlite
-        http://sqlite.org/
+        https://sqlite.org/
         Debian/Ubuntu: libsqlite3-dev
 
     zlib (for PBF support)
-        http://www.zlib.net/
+        https://www.zlib.net/
         Debian/Ubuntu: zlib1g-dev
         openSUSE: zlib-devel
 
