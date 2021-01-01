@@ -210,33 +210,29 @@ void show_incomplete_relations(TMPManager& manager) {
 
 class optional_output {
 
-    std::ostream* stream{nullptr};
+    std::unique_ptr<std::ostream> m_stream{};
+    bool m_enabled = false;
 
 public:
 
-    optional_output() = default;
-
-    ~optional_output() {
-        if (stream && stream != &std::cout) {
-            delete stream;
-        }
-    }
-
     void set_file(const char* filename) {
-        stream = new std::ofstream{filename};
+        m_enabled = true;
+        m_stream = std::make_unique<std::ofstream>(filename);
     }
 
     void set_stdout() noexcept {
-        stream = &std::cout;
+        m_enabled = true;
     }
 
     explicit operator bool() const noexcept {
-        return !!stream;
+        return m_enabled;
     }
 
-    std::ostream& get() const {
-        assert(stream);
-        return *stream;
+    std::ostream& get() const noexcept {
+        if (m_stream) {
+            return *m_stream;
+        }
+        return std::cout;
     }
 
 }; // class optional_output
