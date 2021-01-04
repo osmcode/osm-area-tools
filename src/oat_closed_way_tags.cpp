@@ -27,7 +27,7 @@
 
 #include "oat.hpp"
 
-void print_help() {
+static void print_help() {
     std::cout << "oat_closed_way_tags [OPTIONS] OSMFILE\n\n"
               << "Split up closed ways in OSMFILE according to polygon/non-polygon tags.\n\n"
               << "Options:\n"

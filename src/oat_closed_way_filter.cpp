@@ -21,7 +21,7 @@
 
 #include "oat.hpp"
 
-void print_help() {
+static void print_help() {
     std::cout << "oat_closed_way_filter [OPTIONS] OSMFILE -o OUTPUT\n\n"
               << "Copy closed ways from OSMFILE to OUTPUT.\n\n"
               << "Options:\n"

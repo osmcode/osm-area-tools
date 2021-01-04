@@ -24,7 +24,7 @@
 
 #include "oat.hpp"
 
-bool check_relation(const osmium::Relation& relation, char mptype, int& error_count) {
+static bool check_relation(const osmium::Relation& relation, char mptype, int& error_count) {
     bool okay = true;
     std::vector<osmium::object_id_type> ids;
     ids.reserve(relation.members().size());
@@ -65,7 +65,7 @@ bool check_relation(const osmium::Relation& relation, char mptype, int& error_co
     return okay;
 }
 
-void print_help() {
+static void print_help() {
     std::cout << "oat_find_problems [OPTIONS] OSMFILE\n\n"
               << "Find problems in area relations in OSMFILE.\n\n"
               << "Options:\n"
@@ -75,7 +75,7 @@ void print_help() {
               ;
 }
 
-char mp_type(const char* type) {
+static char mp_type(const char* type) {
     char mptype = ' ';
 
     if (!std::strcmp(type, "multipolygon")) {
