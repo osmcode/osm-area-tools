@@ -43,6 +43,12 @@ Osmium/OSM Area Tools uses the following naming conventions:
 
 Copy only closed ways from input file to output file.
 
+### `oat_complex_areas`
+
+Find all "simple" and "complex" areas and write their IDs to the output files.
+Complex areas are those where the boundary meets itself somewhere, i.e. they
+have a node more than once in the boundary. Simple areas are all others.
+
 ### `oat_create_areas`
 
 Assembles areas from their parts and optionally checks them for validity. Can

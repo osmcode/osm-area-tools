@@ -16,6 +16,11 @@ target_link_libraries(oat_closed_way_tags ${OSMIUM_LIBRARIES})
 set_pthread_on_target(oat_closed_way_tags)
 install(TARGETS oat_closed_way_tags DESTINATION bin)
 
+add_executable(oat_complex_areas oat_complex_areas.cpp)
+target_link_libraries(oat_complex_areas ${OSMIUM_IO_LIBRARIES})
+set_pthread_on_target(oat_complex_areas)
+install(TARGETS oat_complex_areas DESTINATION bin)
+
 add_executable(oat_create_areas oat_create_areas.cpp oat.cpp)
 target_link_libraries(oat_create_areas ${OSMIUM_LIBRARIES})
 set_pthread_on_target(oat_create_areas)
