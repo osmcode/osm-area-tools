@@ -45,76 +45,80 @@ enum category {
     both       = 4
 };
 
-static osmium::tags::KeyValueFilter linestring_tags{false};
-static osmium::tags::KeyValueFilter polygon_tags{false};
-static osmium::tags::KeyFilter uninteresting_tags{true};
+class Classifier {
 
-static category classify(const osmium::TagList& tags) {
-    if (tags.empty()) {
-        return category::notags;
+    osmium::tags::KeyValueFilter m_linestring_tags{false};
+    osmium::tags::KeyValueFilter m_polygon_tags{false};
+    osmium::tags::KeyFilter m_uninteresting_tags{true};
+
+public:
+
+    Classifier() {
+        m_linestring_tags.add(true, "highway");
+        m_linestring_tags.add(true, "leisure", "slipway");
+        m_linestring_tags.add(false, "waterway", "riverbank");
+        m_linestring_tags.add(false, "waterway", "dock");
+        m_linestring_tags.add(true, "waterway");
+
+        m_polygon_tags.add(true, "building");
+        m_polygon_tags.add(true, "building:part");
+        m_polygon_tags.add(true, "landuse");
+        m_polygon_tags.add(true, "natural");
+        m_polygon_tags.add(true, "waterway", "dock");
+        m_polygon_tags.add(true, "waterway", "riverbank");
+        m_polygon_tags.add(false, "leisure", "slipway");
+        m_polygon_tags.add(true, "leisure");
+        m_polygon_tags.add(true, "amenity", "parking");
+        m_polygon_tags.add(true, "amenity", "bicycle_parking");
+        m_polygon_tags.add(true, "aeroway", "apron");
+
+        m_uninteresting_tags.add(false, "created_by");
+        m_uninteresting_tags.add(false, "source");
+        m_uninteresting_tags.add(false, "note");
+        m_uninteresting_tags.add(false, "name");
     }
 
-    osmium::tags::KeyFilter::iterator fi_begin(uninteresting_tags, tags.cbegin(), tags.cend());
-    osmium::tags::KeyFilter::iterator fi_end(uninteresting_tags, tags.cend(), tags.cend());
-    if (std::distance(fi_begin, fi_end) == 0) {
-        return category::notags;
-    }
-
-    const char* area = tags.get_value_by_key("area");
-    if (area) {
-        if (!std::strcmp(area, "yes")) {
-            return category::polygon;
+    category classify(const osmium::TagList& tags) const {
+        if (tags.empty()) {
+            return category::notags;
         }
-        if (!std::strcmp(area, "no")) {
+
+        osmium::tags::KeyFilter::iterator fi_begin(m_uninteresting_tags, tags.cbegin(), tags.cend());
+        osmium::tags::KeyFilter::iterator fi_end(m_uninteresting_tags, tags.cend(), tags.cend());
+        if (std::distance(fi_begin, fi_end) == 0) {
+            return category::notags;
+        }
+
+        const char* area = tags.get_value_by_key("area");
+        if (area) {
+            if (!std::strcmp(area, "yes")) {
+                return category::polygon;
+            }
+            if (!std::strcmp(area, "no")) {
+                return category::linestring;
+            }
+        }
+
+        const bool any_l = osmium::tags::match_any_of(tags, m_linestring_tags);
+        const bool any_p = osmium::tags::match_any_of(tags, m_polygon_tags);
+
+        if (any_l) {
+            if (any_p) {
+                return category::both;
+            }
             return category::linestring;
         }
-    }
 
-    const bool any_l = osmium::tags::match_any_of(tags, linestring_tags);
-    const bool any_p = osmium::tags::match_any_of(tags, polygon_tags);
-
-    if (any_l) {
         if (any_p) {
-            return category::both;
+            return category::polygon;
         }
-        return category::linestring;
+
+        return category::unknown;
     }
 
-    if (any_p) {
-        return category::polygon;
-    }
-
-    return category::unknown;
-}
-
-static void init_taglists() {
-    linestring_tags.add(true, "highway");
-    linestring_tags.add(true, "leisure", "slipway");
-    linestring_tags.add(false, "waterway", "riverbank");
-    linestring_tags.add(false, "waterway", "dock");
-    linestring_tags.add(true, "waterway");
-
-    polygon_tags.add(true, "building");
-    polygon_tags.add(true, "building:part");
-    polygon_tags.add(true, "landuse");
-    polygon_tags.add(true, "natural");
-    polygon_tags.add(true, "waterway", "dock");
-    polygon_tags.add(true, "waterway", "riverbank");
-    polygon_tags.add(false, "leisure", "slipway");
-    polygon_tags.add(true, "leisure");
-    polygon_tags.add(true, "amenity", "parking");
-    polygon_tags.add(true, "amenity", "bicycle_parking");
-    polygon_tags.add(true, "aeroway", "apron");
-
-    uninteresting_tags.add(false, "created_by");
-    uninteresting_tags.add(false, "source");
-    uninteresting_tags.add(false, "note");
-    uninteresting_tags.add(false, "name");
-}
+}; // class Classifier
 
 int main(int argc, char* argv[]) {
-    init_taglists();
-
     std::string output_prefix{"closed-way-tags"};
     auto overwrite = osmium::io::overwrite::no;
 
@@ -151,6 +155,8 @@ int main(int argc, char* argv[]) {
         std::exit(exit_code_cmdline_error);
     }
 
+    Classifier classifier;
+
     const osmium::io::File infile{argv[optind]};
 
     osmium::io::Reader reader{infile, osmium::osm_entity_bits::way};
@@ -170,7 +176,7 @@ int main(int argc, char* argv[]) {
 
     for (const osmium::Way& way : ways) {
         if (way.is_closed()) {
-            const auto way_category = classify(way.tags());
+            const auto way_category = classifier.classify(way.tags());
             ++counter[way_category];
             (*writers[way_category])(way);
         }
