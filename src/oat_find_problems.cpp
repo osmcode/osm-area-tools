@@ -88,64 +88,71 @@ char mp_type(const char* type) {
 }
 
 int main(int argc, char* argv[]) {
-    static const struct option long_options[] = {
-        {"help",          no_argument,       nullptr, 'h'},
-        {"output-format", required_argument, nullptr, 'f'},
-        {"output",        required_argument, nullptr, 'o'},
-        {nullptr, 0, nullptr, 0}
-    };
-
-    std::string output;
-    std::string output_format;
-    while (true) {
-        const int c = getopt_long(argc, argv, "hf:o:", long_options, nullptr);
-        if (c == -1) {
-            break;
-        }
-
-        switch (c) {
-            case 'h':
-                print_help();
-                std::exit(exit_code_ok);
-            case 'f':
-                output_format = optarg;
-                break;
-            case 'o':
-                output = optarg;
-                break;
-            default:
-                std::exit(exit_code_cmdline_error);
-        }
-    }
-
-    const int remaining_args = argc - optind;
-    if (remaining_args != 1) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        std::exit(exit_code_cmdline_error);
-    }
-
-
-    const osmium::io::File output_file{output, output_format};
-    osmium::io::Writer writer{output_file};
-
-    osmium::io::File input_file{argv[optind]};
-    osmium::io::Reader reader{input_file, osmium::osm_entity_bits::relation};
-
     int error_count = 0;
-    while (const osmium::memory::Buffer buffer = reader.read()) {
-        for (const auto &relation : buffer.select<osmium::Relation>()) {
-            const char* type = relation.tags().get_value_by_key("type");
-            if (type) {
-                const char mptype = mp_type(type);
-                if (mptype != ' ' && !check_relation(relation, mptype, error_count)) {
-                    writer(relation);
+
+    try {
+        static const struct option long_options[] = {
+            {"help",          no_argument,       nullptr, 'h'},
+            {"output-format", required_argument, nullptr, 'f'},
+            {"output",        required_argument, nullptr, 'o'},
+            {nullptr, 0, nullptr, 0}
+        };
+
+        std::string output;
+        std::string output_format;
+        while (true) {
+            const int c = getopt_long(argc, argv, "hf:o:", long_options, nullptr);
+            if (c == -1) {
+                break;
+            }
+
+            switch (c) {
+                case 'h':
+                    print_help();
+                    std::exit(exit_code_ok);
+                case 'f':
+                    output_format = optarg;
+                    break;
+                case 'o':
+                    output = optarg;
+                    break;
+                default:
+                    std::exit(exit_code_cmdline_error);
+            }
+        }
+
+        const int remaining_args = argc - optind;
+        if (remaining_args != 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
+            std::exit(exit_code_cmdline_error);
+        }
+
+
+        const osmium::io::File output_file{output, output_format};
+        osmium::io::Writer writer{output_file};
+
+        osmium::io::File input_file{argv[optind]};
+        osmium::io::Reader reader{input_file, osmium::osm_entity_bits::relation};
+
+        while (const osmium::memory::Buffer buffer = reader.read()) {
+            for (const auto &relation : buffer.select<osmium::Relation>()) {
+                const char* type = relation.tags().get_value_by_key("type");
+                if (type) {
+                    const char mptype = mp_type(type);
+                    if (mptype != ' ' && !check_relation(relation, mptype, error_count)) {
+                        writer(relation);
+                    }
                 }
             }
         }
-    }
-    reader.close();
+        reader.close();
 
-    writer.close();
+        writer.close();
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return exit_code_error;
+    }
 
     osmium::MemoryUsage mcheck;
     if (mcheck.peak()) {

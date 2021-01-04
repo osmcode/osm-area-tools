@@ -211,26 +211,32 @@ public:
 }; // class StatsHandler
 
 int main(int argc, char* argv[]) {
-    osmium::util::VerboseOutput vout{true};
+    try {
+        osmium::util::VerboseOutput vout{true};
 
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " OSMFILE\n";
-        std::exit(exit_code_cmdline_error);
+        if (argc != 2) {
+            std::cerr << "Usage: " << argv[0] << " OSMFILE\n";
+            return exit_code_cmdline_error;
+        }
+
+        StatsHandler stats_handler;
+
+        vout << "Reading OSM data...\n";
+
+        const osmium::io::File infile{argv[1]};
+        osmium::io::Reader reader{infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation};
+        osmium::apply(reader, stats_handler);
+        reader.close();
+
+        vout << "Writing statistics to database...\n";
+        stats_handler.write_stats_to_db("area-stats.db");
+
+        vout << "Done.\n";
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return exit_code_error;
     }
-
-    StatsHandler stats_handler;
-
-    vout << "Reading OSM data...\n";
-
-    const osmium::io::File infile{argv[1]};
-    osmium::io::Reader reader{infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation};
-    osmium::apply(reader, stats_handler);
-    reader.close();
-
-    vout << "Writing statistics to database...\n";
-    stats_handler.write_stats_to_db("area-stats.db");
-
-    vout << "Done.\n";
 
     return exit_code_ok;
 }

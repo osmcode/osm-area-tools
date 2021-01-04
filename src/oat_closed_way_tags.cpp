@@ -119,80 +119,86 @@ public:
 }; // class Classifier
 
 int main(int argc, char* argv[]) {
-    std::string output_prefix{"closed-way-tags"};
-    auto overwrite = osmium::io::overwrite::no;
+    try {
+        std::string output_prefix{"closed-way-tags"};
+        auto overwrite = osmium::io::overwrite::no;
 
-    static const struct option long_options[] = {
-        {"help",                no_argument, nullptr, 'h'},
-        {"output-prefix", required_argument, nullptr, 'o'},
-        {"overwrite",           no_argument, nullptr, 'O'},
-        {nullptr, 0, nullptr, 0}
-    };
+        static const struct option long_options[] = {
+            {"help",                no_argument, nullptr, 'h'},
+            {"output-prefix", required_argument, nullptr, 'o'},
+            {"overwrite",           no_argument, nullptr, 'O'},
+            {nullptr, 0, nullptr, 0}
+        };
 
-    while (true) {
-        const int c = getopt_long(argc, argv, "ho:O", long_options, nullptr);
-        if (c == -1) {
-            break;
-        }
-
-        switch (c) {
-            case 'h':
-                print_help();
-                std::exit(exit_code_ok);
-            case 'o':
-                output_prefix = optarg;
+        while (true) {
+            const int c = getopt_long(argc, argv, "ho:O", long_options, nullptr);
+            if (c == -1) {
                 break;
-            case 'O':
-                overwrite = osmium::io::overwrite::allow;
-                break;
-            default:
-                std::exit(exit_code_cmdline_error);
+            }
+
+            switch (c) {
+                case 'h':
+                    print_help();
+                    return exit_code_ok;
+                case 'o':
+                    output_prefix = optarg;
+                    break;
+                case 'O':
+                    overwrite = osmium::io::overwrite::allow;
+                    break;
+                default:
+                    return exit_code_cmdline_error;
+            }
         }
-    }
 
-    if (optind != argc - 1) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        std::exit(exit_code_cmdline_error);
-    }
-
-    Classifier classifier;
-
-    const osmium::io::File infile{argv[optind]};
-
-    osmium::io::Reader reader{infile, osmium::osm_entity_bits::way};
-    osmium::io::Header header = reader.header();
-    header.set("generator", "oat_closed_way_tags");
-
-    std::array<uint32_t, 5> counter = {{0, 0, 0, 0, 0}};
-    std::array<std::unique_ptr<osmium::io::Writer>, 5> writers {{
-        std::make_unique<osmium::io::Writer>(output_prefix + "-unknown.osm.pbf",    header, overwrite),
-        std::make_unique<osmium::io::Writer>(output_prefix + "-notags.osm.pbf",     header, overwrite),
-        std::make_unique<osmium::io::Writer>(output_prefix + "-linestring.osm.pbf", header, overwrite),
-        std::make_unique<osmium::io::Writer>(output_prefix + "-polygon.osm.pbf",    header, overwrite),
-        std::make_unique<osmium::io::Writer>(output_prefix + "-both.osm.pbf",       header, overwrite)
-    }};
-
-    const auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
-
-    for (const osmium::Way& way : ways) {
-        if (way.is_closed()) {
-            const auto way_category = classifier.classify(way.tags());
-            ++counter[way_category];
-            (*writers[way_category])(way);
+        if (optind != argc - 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
+            return exit_code_cmdline_error;
         }
+
+        Classifier classifier;
+
+        const osmium::io::File infile{argv[optind]};
+
+        osmium::io::Reader reader{infile, osmium::osm_entity_bits::way};
+        osmium::io::Header header = reader.header();
+        header.set("generator", "oat_closed_way_tags");
+
+        std::array<uint32_t, 5> counter = {{0, 0, 0, 0, 0}};
+        std::array<std::unique_ptr<osmium::io::Writer>, 5> writers {{
+            std::make_unique<osmium::io::Writer>(output_prefix + "-unknown.osm.pbf",    header, overwrite),
+            std::make_unique<osmium::io::Writer>(output_prefix + "-notags.osm.pbf",     header, overwrite),
+            std::make_unique<osmium::io::Writer>(output_prefix + "-linestring.osm.pbf", header, overwrite),
+            std::make_unique<osmium::io::Writer>(output_prefix + "-polygon.osm.pbf",    header, overwrite),
+            std::make_unique<osmium::io::Writer>(output_prefix + "-both.osm.pbf",       header, overwrite)
+        }};
+
+        const auto ways = osmium::io::make_input_iterator_range<const osmium::Way>(reader);
+
+        for (const osmium::Way& way : ways) {
+            if (way.is_closed()) {
+                const auto way_category = classifier.classify(way.tags());
+                ++counter[way_category];
+                (*writers[way_category])(way);
+            }
+        }
+
+        for (auto& writer : writers) {
+            writer->close();
+        }
+
+        reader.close();
+
+        std::cout << "unknown:    " << counter[category::unknown] << '\n';
+        std::cout << "no tags:    " << counter[category::notags] << '\n';
+        std::cout << "linestring: " << counter[category::linestring] << '\n';
+        std::cout << "polygon:    " << counter[category::polygon] << '\n';
+        std::cout << "both:       " << counter[category::both] << '\n';
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return exit_code_error;
     }
 
-    for (auto& writer : writers) {
-        writer->close();
-    }
-
-    reader.close();
-
-    std::cout << "unknown:    " << counter[category::unknown] << '\n';
-    std::cout << "no tags:    " << counter[category::notags] << '\n';
-    std::cout << "linestring: " << counter[category::linestring] << '\n';
-    std::cout << "polygon:    " << counter[category::polygon] << '\n';
-    std::cout << "both:       " << counter[category::both] << '\n';
 
     return exit_code_ok;
 }

@@ -238,184 +238,153 @@ public:
 }; // class optional_output
 
 int main(int argc, char* argv[]) {
-    osmium::util::VerboseOutput vout{true};
+    try {
+        osmium::util::VerboseOutput vout{true};
 
-    static const struct option long_options[] = {
-        {"check",           no_argument,       nullptr, 'c'},
-        {"collect-only",    no_argument,       nullptr, 'C'},
-        {"only-invalid",    no_argument,       nullptr, 'f'},
-        {"debug",           optional_argument, nullptr, 'd'},
-        {"dump-areas",      optional_argument, nullptr, 'D'},
-        {"empty-areas",     no_argument,       nullptr, 'e'},
-        {"help",            no_argument,       nullptr, 'h'},
-        {"index",           required_argument, nullptr, 'i'},
-        {"show-index",      no_argument,       nullptr, 'I'},
-        {"output",          required_argument, nullptr, 'o'},
-        {"overwrite",       no_argument,       nullptr, 'O'},
-        {"report-problems", optional_argument, nullptr, 'p'},
-        {"show-incomplete", no_argument,       nullptr, 'r'},
-        {"check-roles",     no_argument,       nullptr, 'R'},
-        {"no-new-style",    no_argument,       nullptr, 's'},
-        {"no-old-style",    no_argument,       nullptr, 'S'},
-        {"keep-type-tag",   no_argument,       nullptr, 't'},
-        {"no-way-polygons", no_argument,       nullptr, 'w'},
-        {"no-areas",        no_argument,       nullptr, 'x'},
-        {nullptr, 0, nullptr, 0}
-    };
+        static const struct option long_options[] = {
+            {"check",           no_argument,       nullptr, 'c'},
+            {"collect-only",    no_argument,       nullptr, 'C'},
+            {"only-invalid",    no_argument,       nullptr, 'f'},
+            {"debug",           optional_argument, nullptr, 'd'},
+            {"dump-areas",      optional_argument, nullptr, 'D'},
+            {"empty-areas",     no_argument,       nullptr, 'e'},
+            {"help",            no_argument,       nullptr, 'h'},
+            {"index",           required_argument, nullptr, 'i'},
+            {"show-index",      no_argument,       nullptr, 'I'},
+            {"output",          required_argument, nullptr, 'o'},
+            {"overwrite",       no_argument,       nullptr, 'O'},
+            {"report-problems", optional_argument, nullptr, 'p'},
+            {"show-incomplete", no_argument,       nullptr, 'r'},
+            {"check-roles",     no_argument,       nullptr, 'R'},
+            {"no-new-style",    no_argument,       nullptr, 's'},
+            {"no-old-style",    no_argument,       nullptr, 'S'},
+            {"keep-type-tag",   no_argument,       nullptr, 't'},
+            {"no-way-polygons", no_argument,       nullptr, 'w'},
+            {"no-areas",        no_argument,       nullptr, 'x'},
+            {nullptr, 0, nullptr, 0}
+        };
 
-    std::string database_name;
+        std::string database_name;
 
-    std::string location_index_type{"flex_mem"};
-    const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
+        std::string location_index_type{"flex_mem"};
+        const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
-    optional_output dump_stream;
-    optional_output problem_stream;
+        optional_output dump_stream;
+        optional_output problem_stream;
 
-    bool check = false;
-    bool collect_only = false;
-    bool only_invalid = false;
-    bool show_incomplete = false;
-    bool overwrite = false;
+        bool check = false;
+        bool collect_only = false;
+        bool only_invalid = false;
+        bool show_incomplete = false;
+        bool overwrite = false;
 
-    assembler_type::config_type assembler_config;
-    assembler_config.create_empty_areas = false;
+        assembler_type::config_type assembler_config;
+        assembler_config.create_empty_areas = false;
 
-    while (true) {
-        const int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, nullptr);
-        if (c == -1) {
-            break;
-        }
-
-        switch (c) {
-            case 'c':
-                check = true;
+        while (true) {
+            const int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, nullptr);
+            if (c == -1) {
                 break;
-            case 'C':
-                collect_only = true;
-                break;
-            case 'd':
-                assembler_config.debug_level = optarg ? std::atoi(optarg) : 1;
-                break;
-            case 'D':
-                if (optarg) {
-                    dump_stream.set_file(optarg);
-                } else {
-                    dump_stream.set_stdout();
-                }
-                break;
-            case 'e':
-                assembler_config.create_empty_areas = true;
-                break;
-            case 'f':
-                only_invalid = true;
-                check = true;
-                break;
-            case 'h':
-                print_help();
-                std::exit(exit_code_ok);
-            case 'i':
-                location_index_type = optarg;
-                break;
-            case 'I':
-                std::cout << "Available index types:\n";
-                for (const auto& map_type : map_factory.map_types()) {
-                    std::cout << "  " << map_type;
-                    if (map_type == location_index_type) {
-                        std::cout << " (default)";
+            }
+
+            switch (c) {
+                case 'c':
+                    check = true;
+                    break;
+                case 'C':
+                    collect_only = true;
+                    break;
+                case 'd':
+                    assembler_config.debug_level = optarg ? std::atoi(optarg) : 1;
+                    break;
+                case 'D':
+                    if (optarg) {
+                        dump_stream.set_file(optarg);
+                    } else {
+                        dump_stream.set_stdout();
                     }
-                    std::cout << '\n';
-                }
-                std::exit(exit_code_ok);
-            case 'o':
-                database_name = optarg;
-                break;
-            case 'O':
-                overwrite = true;
-                break;
-            case 'p':
-                if (optarg) {
-                    problem_stream.set_file(optarg);
-                } else {
-                    problem_stream.set_stdout();
-                }
-                break;
-            case 'r':
-                show_incomplete = true;
-                break;
-            case 'R':
-                assembler_config.check_roles = true;
-                break;
-            case 's':
-                assembler_config.create_new_style_polygons = false;
-                break;
-            case 'S':
-                assembler_config.create_old_style_polygons = false;
-                break;
-            case 't':
-                assembler_config.keep_type_tag = true;
-                break;
-            case 'w':
-                assembler_config.create_way_polygons = false;
-                break;
-            case 'x':
-                assembler_config.create_new_style_polygons = false;
-                assembler_config.create_old_style_polygons = false;
-                assembler_config.create_way_polygons = false;
-                break;
-            default:
-                std::exit(exit_code_cmdline_error);
-        }
-    }
-
-    const int remaining_args = argc - optind;
-    if (remaining_args != 1) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        std::exit(exit_code_cmdline_error);
-    }
-
-    auto location_index = map_factory.create_map(location_index_type);
-    location_handler_type location_handler{*location_index};
-    location_handler.ignore_errors(); // XXX
-
-    const osmium::io::File input_file{argv[optind]};
-
-    const bool need_locations = location_index_type != "none";
-
-    if (collect_only) {
-        DummyAssembler::config_type config;
-        mp_manager_only mp_manager{config};
-
-        vout << "Starting first pass (reading relations)...\n";
-        osmium::relations::read_relations(input_file, mp_manager);
-        vout << "First pass done.\n";
-
-        vout << "Memory:\n";
-        osmium::relations::print_used_memory(vout, mp_manager.used_memory());
-
-        vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
-        osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
-        if (need_locations) {
-            osmium::apply(reader2, location_handler, mp_manager.handler());
-        } else {
-            osmium::apply(reader2, mp_manager.handler());
-        }
-        reader2.close();
-        vout << "Second pass done\n";
-
-        vout << "Memory:\n";
-        osmium::relations::print_used_memory(vout, mp_manager.used_memory());
-
-        vout << "Stats:" << mp_manager.stats() << '\n';
-    } else {
-        std::unique_ptr<osmium::area::ProblemReporter> reporter{nullptr};
-
-        if (problem_stream) {
-            reporter = std::make_unique<osmium::area::ProblemReporterStream>(problem_stream.get());
-            assembler_config.problem_reporter = reporter.get();
+                    break;
+                case 'e':
+                    assembler_config.create_empty_areas = true;
+                    break;
+                case 'f':
+                    only_invalid = true;
+                    check = true;
+                    break;
+                case 'h':
+                    print_help();
+                    return exit_code_ok;
+                case 'i':
+                    location_index_type = optarg;
+                    break;
+                case 'I':
+                    std::cout << "Available index types:\n";
+                    for (const auto& map_type : map_factory.map_types()) {
+                        std::cout << "  " << map_type;
+                        if (map_type == location_index_type) {
+                            std::cout << " (default)";
+                        }
+                        std::cout << '\n';
+                    }
+                    return exit_code_ok;
+                case 'o':
+                    database_name = optarg;
+                    break;
+                case 'O':
+                    overwrite = true;
+                    break;
+                case 'p':
+                    if (optarg) {
+                        problem_stream.set_file(optarg);
+                    } else {
+                        problem_stream.set_stdout();
+                    }
+                    break;
+                case 'r':
+                    show_incomplete = true;
+                    break;
+                case 'R':
+                    assembler_config.check_roles = true;
+                    break;
+                case 's':
+                    assembler_config.create_new_style_polygons = false;
+                    break;
+                case 'S':
+                    assembler_config.create_old_style_polygons = false;
+                    break;
+                case 't':
+                    assembler_config.keep_type_tag = true;
+                    break;
+                case 'w':
+                    assembler_config.create_way_polygons = false;
+                    break;
+                case 'x':
+                    assembler_config.create_new_style_polygons = false;
+                    assembler_config.create_old_style_polygons = false;
+                    assembler_config.create_way_polygons = false;
+                    break;
+                default:
+                    return exit_code_cmdline_error;
+            }
         }
 
-        if (database_name.empty()) {
-            mp_manager_type mp_manager{assembler_config};
+        const int remaining_args = argc - optind;
+        if (remaining_args != 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
+            return exit_code_cmdline_error;
+        }
+
+        auto location_index = map_factory.create_map(location_index_type);
+        location_handler_type location_handler{*location_index};
+        location_handler.ignore_errors(); // XXX
+
+        const osmium::io::File input_file{argv[optind]};
+
+        const bool need_locations = location_index_type != "none";
+
+        if (collect_only) {
+            DummyAssembler::config_type config;
+            mp_manager_only mp_manager{config};
 
             vout << "Starting first pass (reading relations)...\n";
             osmium::relations::read_relations(input_file, mp_manager);
@@ -427,9 +396,9 @@ int main(int argc, char* argv[]) {
             vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
             osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
             if (need_locations) {
-                osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/) {}));
+                osmium::apply(reader2, location_handler, mp_manager.handler());
             } else {
-                osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/) {}));
+                osmium::apply(reader2, mp_manager.handler());
             }
             reader2.close();
             vout << "Second pass done\n";
@@ -438,92 +407,129 @@ int main(int argc, char* argv[]) {
             osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
             vout << "Stats:" << mp_manager.stats() << '\n';
-
-            if (show_incomplete) {
-                show_incomplete_relations(mp_manager);
-            }
         } else {
-            if (overwrite) {
-                unlink(database_name.c_str());
+            std::unique_ptr<osmium::area::ProblemReporter> reporter{nullptr};
+
+            if (problem_stream) {
+                reporter = std::make_unique<osmium::area::ProblemReporterStream>(problem_stream.get());
+                assembler_config.problem_reporter = reporter.get();
             }
 
-            CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
-            osmium::geom::OGRFactory<> factory;
+            if (database_name.empty()) {
+                mp_manager_type mp_manager{assembler_config};
 
-            gdalcpp::Dataset dataset{"SQLite", database_name, gdalcpp::SRS{factory.proj_string()}, { "SPATIALITE=TRUE", "INIT_WITH_EPSG=NO" }};
-            dataset.enable_auto_transactions();
+                vout << "Starting first pass (reading relations)...\n";
+                osmium::relations::read_relations(input_file, mp_manager);
+                vout << "First pass done.\n";
 
-            dataset.exec("PRAGMA journal_mode = OFF;");
+                vout << "Memory:\n";
+                osmium::relations::print_used_memory(vout, mp_manager.used_memory());
 
-            OutputOGR output{dataset, factory};
-            output.set_check(check);
-            output.set_only_invalid(only_invalid);
-
-            if (!problem_stream) {
-                reporter = std::make_unique<osmium::area::ProblemReporterOGR>(dataset);
-            }
-            assembler_config.problem_reporter = reporter.get();
-            mp_manager_type mp_manager{assembler_config};
-
-            vout << "Starting first pass (reading relations)...\n";
-            osmium::relations::read_relations(input_file, mp_manager);
-            vout << "First pass done.\n";
-
-            vout << "Memory:\n";
-            osmium::relations::print_used_memory(vout, mp_manager.used_memory());
-
-            vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
-            osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
-
-            if (dump_stream) {
-                osmium::handler::Dump dump_handler{dump_stream.get()};
+                vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
+                osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
                 if (need_locations) {
-                    osmium::apply(reader2, location_handler, mp_manager.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, dump_handler, output);
-                    }));
+                    osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/) {}));
                 } else {
-                    osmium::apply(reader2, mp_manager.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, dump_handler, output);
-                    }));
+                    osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/) {}));
+                }
+                reader2.close();
+                vout << "Second pass done\n";
+
+                vout << "Memory:\n";
+                osmium::relations::print_used_memory(vout, mp_manager.used_memory());
+
+                vout << "Stats:" << mp_manager.stats() << '\n';
+
+                if (show_incomplete) {
+                    show_incomplete_relations(mp_manager);
                 }
             } else {
-                if (need_locations) {
-                    osmium::apply(reader2, location_handler, mp_manager.handler([&output](osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, output);
-                    }));
-                } else {
-                    osmium::apply(reader2, mp_manager.handler([&output](osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, output);
-                    }));
+                if (overwrite) {
+                    unlink(database_name.c_str());
                 }
-            }
 
-            reader2.close();
-            vout << "Second pass done\n";
+                CPLSetConfigOption("OGR_SQLITE_SYNCHRONOUS", "OFF");
+                osmium::geom::OGRFactory<> factory;
 
-            if (!problem_stream) {
-                reporter.reset();
-            }
+                gdalcpp::Dataset dataset{"SQLite", database_name, gdalcpp::SRS{factory.proj_string()}, { "SPATIALITE=TRUE", "INIT_WITH_EPSG=NO" }};
+                dataset.enable_auto_transactions();
 
-            osmium::relations::print_used_memory(vout, mp_manager.used_memory());
+                dataset.exec("PRAGMA journal_mode = OFF;");
 
-            vout << "Stats:" << mp_manager.stats() << '\n';
+                OutputOGR output{dataset, factory};
+                output.set_check(check);
+                output.set_only_invalid(only_invalid);
 
-            if (show_incomplete) {
-                show_incomplete_relations(mp_manager);
+                if (!problem_stream) {
+                    reporter = std::make_unique<osmium::area::ProblemReporterOGR>(dataset);
+                }
+                assembler_config.problem_reporter = reporter.get();
+                mp_manager_type mp_manager{assembler_config};
+
+                vout << "Starting first pass (reading relations)...\n";
+                osmium::relations::read_relations(input_file, mp_manager);
+                vout << "First pass done.\n";
+
+                vout << "Memory:\n";
+                osmium::relations::print_used_memory(vout, mp_manager.used_memory());
+
+                vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
+                osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
+
+                if (dump_stream) {
+                    osmium::handler::Dump dump_handler{dump_stream.get()};
+                    if (need_locations) {
+                        osmium::apply(reader2, location_handler, mp_manager.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
+                            osmium::apply(buffer, dump_handler, output);
+                        }));
+                    } else {
+                        osmium::apply(reader2, mp_manager.handler([&output, &dump_handler](osmium::memory::Buffer&& buffer) {
+                            osmium::apply(buffer, dump_handler, output);
+                        }));
+                    }
+                } else {
+                    if (need_locations) {
+                        osmium::apply(reader2, location_handler, mp_manager.handler([&output](osmium::memory::Buffer&& buffer) {
+                            osmium::apply(buffer, output);
+                        }));
+                    } else {
+                        osmium::apply(reader2, mp_manager.handler([&output](osmium::memory::Buffer&& buffer) {
+                            osmium::apply(buffer, output);
+                        }));
+                    }
+                }
+
+                reader2.close();
+                vout << "Second pass done\n";
+
+                if (!problem_stream) {
+                    reporter.reset();
+                }
+
+                osmium::relations::print_used_memory(vout, mp_manager.used_memory());
+
+                vout << "Stats:" << mp_manager.stats() << '\n';
+
+                if (show_incomplete) {
+                    show_incomplete_relations(mp_manager);
+                }
             }
         }
+
+        vout << "Estimated memory usage:\n";
+        vout << "  location index: " << (location_index->used_memory() / 1024) << "kB\n";
+
+        osmium::MemoryUsage mcheck;
+        vout << "Actual memory usage:\n"
+            << "  current: " << mcheck.current() << "MB\n"
+            << "  peak:    " << mcheck.peak() << "MB\n";
+
+        vout << "Done.\n";
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return exit_code_error;
     }
-
-    vout << "Estimated memory usage:\n";
-    vout << "  location index: " << (location_index->used_memory() / 1024) << "kB\n";
-
-    osmium::MemoryUsage mcheck;
-    vout << "Actual memory usage:\n"
-         << "  current: " << mcheck.current() << "MB\n"
-         << "  peak:    " << mcheck.peak() << "MB\n";
-
-    vout << "Done.\n";
 
     return exit_code_ok;
 }

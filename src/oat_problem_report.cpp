@@ -62,102 +62,108 @@ using mp_manager_type = osmium::area::MultipolygonManager<assembler_type>;
 #endif
 
 int main(int argc, char* argv[]) {
-    osmium::util::VerboseOutput vout{true};
+    try {
+        osmium::util::VerboseOutput vout{true};
 
-    static const struct option long_options[] = {
-        {"help",       no_argument,       nullptr, 'h'},
-        {"index",      required_argument, nullptr, 'i'},
-        {"show-index", no_argument,       nullptr, 'I'},
-        {nullptr, 0, nullptr, 0}
-    };
+        static const struct option long_options[] = {
+            {"help",       no_argument,       nullptr, 'h'},
+            {"index",      required_argument, nullptr, 'i'},
+            {"show-index", no_argument,       nullptr, 'I'},
+            {nullptr, 0, nullptr, 0}
+        };
 
-    std::string database_name{"area_problems"};
+        std::string database_name{"area_problems"};
 
-    std::string location_index_type{"flex_mem"};
-    const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
+        std::string location_index_type{"flex_mem"};
+        const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
-    while (true) {
-        const int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
-        if (c == -1) {
-            break;
-        }
-
-        switch (c) {
-            case 'h':
-                print_help();
-                std::exit(exit_code_ok);
-            case 'i':
-                location_index_type = optarg;
+        while (true) {
+            const int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
+            if (c == -1) {
                 break;
-            case 'I':
-                std::cout << "Available index types:\n";
-                for (const auto& map_type : map_factory.map_types()) {
-                    std::cout << "  " << map_type;
-                    if (map_type == location_index_type) {
-                        std::cout << " (default)";
+            }
+
+            switch (c) {
+                case 'h':
+                    print_help();
+                    return exit_code_ok;
+                case 'i':
+                    location_index_type = optarg;
+                    break;
+                case 'I':
+                    std::cout << "Available index types:\n";
+                    for (const auto& map_type : map_factory.map_types()) {
+                        std::cout << "  " << map_type;
+                        if (map_type == location_index_type) {
+                            std::cout << " (default)";
+                        }
+                        std::cout << '\n';
                     }
-                    std::cout << '\n';
-                }
-                std::exit(exit_code_ok);
-            default:
-                std::exit(exit_code_cmdline_error);
+                    return exit_code_ok;
+                default:
+                    return exit_code_cmdline_error;
+            }
         }
+
+        const int remaining_args = argc - optind;
+        if (remaining_args != 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
+            return exit_code_cmdline_error;
+        }
+
+        auto location_index = map_factory.create_map(location_index_type);
+        location_handler_type location_handler(*location_index);
+        location_handler.ignore_errors(); // XXX
+
+        const osmium::io::File input_file{argv[optind]};
+
+        assembler_type::config_type assembler_config;
+        assembler_config.check_roles = true;
+
+        osmium::geom::OGRFactory<> factory;
+
+        gdalcpp::Dataset dataset{"ESRI Shapefile", database_name, gdalcpp::SRS{factory.proj_string()}};
+        osmium::area::ProblemReporterOGR problem_reporter{dataset};
+        assembler_config.problem_reporter = &problem_reporter;
+        mp_manager_type mp_manager{assembler_config};
+
+        vout << "Starting first pass (reading relations)...\n";
+        osmium::relations::read_relations(input_file, mp_manager);
+        vout << "First pass done.\n";
+
+        vout << "Memory:\n";
+        osmium::relations::print_used_memory(vout, mp_manager.used_memory());
+
+        vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
+        osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
+
+        if (location_index_type == "none") {
+            osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/){}));
+        } else {
+            osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/){}));
+        }
+
+        reader2.close();
+        vout << "Second pass done\n";
+
+        osmium::relations::print_used_memory(vout, mp_manager.used_memory());
+
+        vout << "Stats:" << mp_manager.stats() << '\n';
+
+        vout << "Estimated memory usage:\n";
+        vout << "  location index: " << (location_index->used_memory() / (1024 * 1024)) << "MB\n";
+
+        osmium::MemoryUsage mcheck;
+        vout << "Actual memory usage:\n"
+            << "  current: " << mcheck.current() << "MB\n"
+            << "  peak:    " << mcheck.peak() << "MB\n";
+
+        vout << "Done.\n";
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return exit_code_error;
     }
-
-    const int remaining_args = argc - optind;
-    if (remaining_args != 1) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        std::exit(exit_code_cmdline_error);
-    }
-
-    auto location_index = map_factory.create_map(location_index_type);
-    location_handler_type location_handler(*location_index);
-    location_handler.ignore_errors(); // XXX
-
-    const osmium::io::File input_file{argv[optind]};
-
-    assembler_type::config_type assembler_config;
-    assembler_config.check_roles = true;
-
-    osmium::geom::OGRFactory<> factory;
-
-    gdalcpp::Dataset dataset{"ESRI Shapefile", database_name, gdalcpp::SRS{factory.proj_string()}};
-    osmium::area::ProblemReporterOGR problem_reporter{dataset};
-    assembler_config.problem_reporter = &problem_reporter;
-    mp_manager_type mp_manager{assembler_config};
-
-    vout << "Starting first pass (reading relations)...\n";
-    osmium::relations::read_relations(input_file, mp_manager);
-    vout << "First pass done.\n";
-
-    vout << "Memory:\n";
-    osmium::relations::print_used_memory(vout, mp_manager.used_memory());
-
-    vout << "Starting second pass (reading nodes and ways and assembling areas)...\n";
-    osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
-
-    if (location_index_type == "none") {
-        osmium::apply(reader2, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/){}));
-    } else {
-        osmium::apply(reader2, location_handler, mp_manager.handler([](osmium::memory::Buffer&& /*buffer*/){}));
-    }
-
-    reader2.close();
-    vout << "Second pass done\n";
-
-    osmium::relations::print_used_memory(vout, mp_manager.used_memory());
-
-    vout << "Stats:" << mp_manager.stats() << '\n';
-
-    vout << "Estimated memory usage:\n";
-    vout << "  location index: " << (location_index->used_memory() / (1024 * 1024)) << "MB\n";
-
-    osmium::MemoryUsage mcheck;
-    vout << "Actual memory usage:\n"
-         << "  current: " << mcheck.current() << "MB\n"
-         << "  peak:    " << mcheck.peak() << "MB\n";
-
-    vout << "Done.\n";
 
     return exit_code_ok;
 }

@@ -111,61 +111,67 @@ static void print_help() {
 }
 
 int main(int argc, char* argv[]) {
-    static const struct option long_options[] = {
-        {"help",      no_argument,       nullptr, 'h'},
-        {"min-nodes", required_argument, nullptr, 'n'},
-        {"min-ways",  required_argument, nullptr, 'w'},
-        {"output",    required_argument, nullptr, 'o'},
-        {nullptr, 0, nullptr, 0}
-    };
+    try {
+        static const struct option long_options[] = {
+            {"help",      no_argument,       nullptr, 'h'},
+            {"min-nodes", required_argument, nullptr, 'n'},
+            {"min-ways",  required_argument, nullptr, 'w'},
+            {"output",    required_argument, nullptr, 'o'},
+            {nullptr, 0, nullptr, 0}
+        };
 
-    std::size_t min_ways = 1000;
-    std::size_t min_nodes = 100000;
-    std::string output{"large_areas"};
-    while (true) {
-        int c = getopt_long(argc, argv, "hn:o:w:", long_options, nullptr);
-        if (c == -1) {
-            break;
+        std::size_t min_ways = 1000;
+        std::size_t min_nodes = 100000;
+        std::string output{"large_areas"};
+        while (true) {
+            int c = getopt_long(argc, argv, "hn:o:w:", long_options, nullptr);
+            if (c == -1) {
+                break;
+            }
+
+            switch (c) {
+                case 'h':
+                    print_help();
+                    return exit_code_ok;
+                case 'n':
+                    min_nodes = std::atoi(optarg);
+                    break;
+                case 'w':
+                    min_ways = std::atoi(optarg);
+                    break;
+                case 'o':
+                    output = optarg;
+                    break;
+                default:
+                    return exit_code_cmdline_error;
+            }
         }
 
-        switch (c) {
-            case 'h':
-                print_help();
-                std::exit(exit_code_ok);
-            case 'n':
-                min_nodes = std::atoi(optarg);
-                break;
-            case 'w':
-                min_ways = std::atoi(optarg);
-                break;
-            case 'o':
-                output = optarg;
-                break;
-            default:
-                std::exit(exit_code_cmdline_error);
+        const int remaining_args = argc - optind;
+        if (remaining_args != 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
+            return exit_code_cmdline_error;
         }
+
+        osmium::io::Writer writer{output + ".osm.pbf"};
+
+        Sqlite::Database db{output + ".db", SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE}; // NOLINT(hicpp-signed-bitwise)
+        db.exec("CREATE TABLE areas (relation_id INTEGER, num_ways INTEGER, num_nodes INTEGER, num_tags INTEGER, type VARCHAR, key VARCHAR, value VARCHAR, name VARCHAR, name_en VARCHAR);");
+        Sqlite::Statement insert_into_areas{db, "INSERT INTO areas (relation_id, num_ways, num_nodes, num_tags, type, key, value, name, name_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"};
+
+        LargeAreasHandler handler{writer, insert_into_areas, min_ways, min_nodes};
+
+        const osmium::io::File infile{argv[optind]};
+        osmium::io::Reader reader{infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation};
+        osmium::apply(reader, handler);
+        reader.close();
+
+        writer.close();
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return exit_code_error;
     }
-
-    const int remaining_args = argc - optind;
-    if (remaining_args != 1) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        std::exit(exit_code_cmdline_error);
-    }
-
-    osmium::io::Writer writer{output + ".osm.pbf"};
-
-    Sqlite::Database db{output + ".db", SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE}; // NOLINT(hicpp-signed-bitwise)
-    db.exec("CREATE TABLE areas (relation_id INTEGER, num_ways INTEGER, num_nodes INTEGER, num_tags INTEGER, type VARCHAR, key VARCHAR, value VARCHAR, name VARCHAR, name_en VARCHAR);");
-    Sqlite::Statement insert_into_areas{db, "INSERT INTO areas (relation_id, num_ways, num_nodes, num_tags, type, key, value, name, name_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"};
-
-    LargeAreasHandler handler{writer, insert_into_areas, min_ways, min_nodes};
-
-    const osmium::io::File infile{argv[optind]};
-    osmium::io::Reader reader{infile, osmium::osm_entity_bits::way | osmium::osm_entity_bits::relation};
-    osmium::apply(reader, handler);
-    reader.close();
-
-    writer.close();
 
     osmium::MemoryUsage mcheck;
     std::cerr << "Actual memory usage:\n"

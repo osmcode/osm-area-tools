@@ -78,124 +78,130 @@ struct tag_counter {
 };
 
 int main(int argc, char* argv[]) {
-    std::ios_base::sync_with_stdio(false);
+    try {
+        std::ios_base::sync_with_stdio(false);
 
-    static const struct option long_options[] = {
-        {"help",       no_argument,       nullptr, 'h'},
-        {"index",      required_argument, nullptr, 'i'},
-        {"show-index", no_argument,       nullptr, 'I'},
-        {nullptr, 0, nullptr, 0}
-    };
+        static const struct option long_options[] = {
+            {"help",       no_argument,       nullptr, 'h'},
+            {"index",      required_argument, nullptr, 'i'},
+            {"show-index", no_argument,       nullptr, 'I'},
+            {nullptr, 0, nullptr, 0}
+        };
 
-    std::string location_index_type{"flex_mem"};
-    const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
+        std::string location_index_type{"flex_mem"};
+        const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
 
-    while (true) {
-        const int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
-        if (c == -1) {
-            break;
-        }
-
-        switch (c) {
-            case 'h':
-                print_help();
-                std::exit(exit_code_ok);
-            case 'i':
-                location_index_type = optarg;
+        while (true) {
+            const int c = getopt_long(argc, argv, "hi:I", long_options, nullptr);
+            if (c == -1) {
                 break;
-            case 'I':
-                std::cout << "Available index types:\n";
-                for (const auto& map_type : map_factory.map_types()) {
-                    std::cout << "  " << map_type;
-                    if (map_type == location_index_type) {
-                        std::cout << " (default)";
+            }
+
+            switch (c) {
+                case 'h':
+                    print_help();
+                    return exit_code_ok;
+                case 'i':
+                    location_index_type = optarg;
+                    break;
+                case 'I':
+                    std::cout << "Available index types:\n";
+                    for (const auto& map_type : map_factory.map_types()) {
+                        std::cout << "  " << map_type;
+                        if (map_type == location_index_type) {
+                            std::cout << " (default)";
+                        }
+                        std::cout << '\n';
                     }
-                    std::cout << '\n';
-                }
-                std::exit(exit_code_ok);
-            default:
-                std::exit(exit_code_cmdline_error);
+                    return exit_code_ok;
+                default:
+                    return exit_code_cmdline_error;
+            }
         }
-    }
 
-    const int remaining_args = argc - optind;
-    if (remaining_args != 1) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
-        std::exit(exit_code_cmdline_error);
-    }
+        const int remaining_args = argc - optind;
+        if (remaining_args != 1) {
+            std::cerr << "Usage: " << argv[0] << " [OPTIONS] OSMFILE\n";
+            return exit_code_cmdline_error;
+        }
 
-    auto location_index = map_factory.create_map(location_index_type);
-    location_handler_type location_handler{*location_index};
-    location_handler.ignore_errors(); // XXX
+        auto location_index = map_factory.create_map(location_index_type);
+        location_handler_type location_handler{*location_index};
+        location_handler.ignore_errors(); // XXX
 
-    const osmium::io::File input_file{argv[optind]};
+        const osmium::io::File input_file{argv[optind]};
 
-    assembler_type::config_type assembler_config;
-    assembler_config.create_empty_areas = true;
+        assembler_type::config_type assembler_config;
+        assembler_config.create_empty_areas = true;
 
-    mp_manager_type mp_manager{assembler_config};
+        mp_manager_type mp_manager{assembler_config};
 
-    osmium::relations::read_relations(input_file, mp_manager);
+        osmium::relations::read_relations(input_file, mp_manager);
 
-    osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
+        osmium::io::Reader reader2{input_file, entity_bits(location_index_type)};
 
-    tag_counter counter;
+        tag_counter counter;
 
-    auto mp_manager_handler = mp_manager.handler([&counter](osmium::memory::Buffer&& buffer){
-        for (const auto& area : buffer.select<osmium::Area>()) {
-            if (area.num_rings().first == 0) {
-                if (area.tags().has_key("name")) {
-                    ++counter.name;
-                }
-                if (area.tags().has_key("building")) {
-                    ++counter.building;
-                } else if (area.tags().has_key("landuse")) {
-                    ++counter.landuse;
-                } else if (area.tags().has_key("natural")) {
-                    ++counter.natural;
-                } else if (area.tags().has_key("amenity")) {
-                    ++counter.amenity;
-                } else if (area.tags().has_key("boundary")) {
-                    ++counter.boundary;
-                } else if (area.tags().has_key("sport")) {
-                    ++counter.sport;
-                } else if (area.tags().has_key("leisure")) {
-                    ++counter.leisure;
-                } else if (area.tags().has_key("place")) {
-                    ++counter.place;
-                } else if (area.tags().has_key("waterway")) {
-                    ++counter.waterway;
-                } else {
-                    ++counter.unknown;
-                    for (const osmium::Tag& tag : area.tags()) {
-                        std::cerr << area.id() << ' ' << tag.key() << ' ' << tag.value() << '\n';
+        auto mp_manager_handler = mp_manager.handler([&counter](osmium::memory::Buffer&& buffer){
+            for (const auto& area : buffer.select<osmium::Area>()) {
+                if (area.num_rings().first == 0) {
+                    if (area.tags().has_key("name")) {
+                        ++counter.name;
+                    }
+                    if (area.tags().has_key("building")) {
+                        ++counter.building;
+                    } else if (area.tags().has_key("landuse")) {
+                        ++counter.landuse;
+                    } else if (area.tags().has_key("natural")) {
+                        ++counter.natural;
+                    } else if (area.tags().has_key("amenity")) {
+                        ++counter.amenity;
+                    } else if (area.tags().has_key("boundary")) {
+                        ++counter.boundary;
+                    } else if (area.tags().has_key("sport")) {
+                        ++counter.sport;
+                    } else if (area.tags().has_key("leisure")) {
+                        ++counter.leisure;
+                    } else if (area.tags().has_key("place")) {
+                        ++counter.place;
+                    } else if (area.tags().has_key("waterway")) {
+                        ++counter.waterway;
+                    } else {
+                        ++counter.unknown;
+                        for (const osmium::Tag& tag : area.tags()) {
+                            std::cerr << area.id() << ' ' << tag.key() << ' ' << tag.value() << '\n';
+                        }
                     }
                 }
             }
+        });
+
+        if (location_index_type == "none") {
+            osmium::apply(reader2, mp_manager_handler);
+        } else {
+            osmium::apply(reader2, location_handler, mp_manager_handler);
         }
-    });
 
-    if (location_index_type == "none") {
-        osmium::apply(reader2, mp_manager_handler);
-    } else {
-        osmium::apply(reader2, location_handler, mp_manager_handler);
+        reader2.close();
+
+        std::cout << "amenity:   " << counter.amenity  << '\n';
+        std::cout << "boundary:  " << counter.boundary << '\n';
+        std::cout << "building:  " << counter.building << '\n';
+        std::cout << "landuse:   " << counter.landuse  << '\n';
+        std::cout << "leisure:   " << counter.leisure  << '\n';
+        std::cout << "natural:   " << counter.natural  << '\n';
+        std::cout << "place:     " << counter.place    << '\n';
+        std::cout << "sport:     " << counter.sport    << '\n';
+        std::cout << "waterway:  " << counter.waterway << '\n';
+
+        std::cout << "unknown:   " << counter.unknown << '\n';
+
+        std::cout << "with name: " << counter.name << '\n';
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return exit_code_error;
     }
-
-    reader2.close();
-
-    std::cout << "amenity:   " << counter.amenity  << '\n';
-    std::cout << "boundary:  " << counter.boundary << '\n';
-    std::cout << "building:  " << counter.building << '\n';
-    std::cout << "landuse:   " << counter.landuse  << '\n';
-    std::cout << "leisure:   " << counter.leisure  << '\n';
-    std::cout << "natural:   " << counter.natural  << '\n';
-    std::cout << "place:     " << counter.place    << '\n';
-    std::cout << "sport:     " << counter.sport    << '\n';
-    std::cout << "waterway:  " << counter.waterway << '\n';
-
-    std::cout << "unknown:   " << counter.unknown << '\n';
-
-    std::cout << "with name: " << counter.name << '\n';
 
     return exit_code_ok;
 }
