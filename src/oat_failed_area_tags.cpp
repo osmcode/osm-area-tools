@@ -105,14 +105,7 @@ int main(int argc, char* argv[]) {
                     location_index_type = optarg;
                     break;
                 case 'I':
-                    std::cout << "Available index types:\n";
-                    for (const auto& map_type : map_factory.map_types()) {
-                        std::cout << "  " << map_type;
-                        if (map_type == location_index_type) {
-                            std::cout << " (default)";
-                        }
-                        std::cout << '\n';
-                    }
+                    show_index_types();
                     return exit_code_ok;
                 default:
                     return exit_code_cmdline_error;

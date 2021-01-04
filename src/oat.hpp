@@ -13,4 +13,6 @@ enum exit_codes {
 
 osmium::osm_entity_bits::type entity_bits(const std::string& location_index_type);
 
+void show_index_types();
+
 #endif // OAT_HPP
