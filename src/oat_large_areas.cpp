@@ -156,6 +156,8 @@ int main(int argc, char* argv[]) {
         osmium::io::Writer writer{output + ".osm.pbf"};
 
         Sqlite::Database db{output + ".db", SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE}; // NOLINT(hicpp-signed-bitwise)
+        db.exec("PRAGMA journal_mode = OFF;");
+        db.exec("PRAGMA synchronous  = OFF;");
         db.exec("CREATE TABLE areas (relation_id INTEGER, num_ways INTEGER, num_nodes INTEGER, num_tags INTEGER, type VARCHAR, key VARCHAR, value VARCHAR, name VARCHAR, name_en VARCHAR);");
         Sqlite::Statement insert_into_areas{db, "INSERT INTO areas (relation_id, num_ways, num_nodes, num_tags, type, key, value, name, name_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"};
 
