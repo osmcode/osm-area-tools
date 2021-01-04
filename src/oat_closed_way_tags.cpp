@@ -194,11 +194,12 @@ int main(int argc, char* argv[]) {
         std::cout << "linestring: " << counter[category::linestring] << '\n';
         std::cout << "polygon:    " << counter[category::polygon] << '\n';
         std::cout << "both:       " << counter[category::both] << '\n';
+
+        std::cerr << "Results written to files '" << output_prefix << "-*.osm.pbf'.\n";
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
         return exit_code_error;
     }
-
 
     return exit_code_ok;
 }

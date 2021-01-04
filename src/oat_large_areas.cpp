@@ -178,6 +178,8 @@ int main(int argc, char* argv[]) {
               << "  current: " << mcheck.current() << "MB\n"
               << "  peak:    " << mcheck.peak() << "MB\n";
 
+    std::cerr << "Results written to 'large_areas.db' and 'large_areas.osm.pbf'.\n";
+
     return exit_code_ok;
 }
 

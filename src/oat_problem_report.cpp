@@ -151,6 +151,7 @@ int main(int argc, char* argv[]) {
             << "  current: " << mcheck.current() << "MB\n"
             << "  peak:    " << mcheck.peak() << "MB\n";
 
+        vout << "Results written to 'area_problems' directory.\n";
         vout << "Done.\n";
 
     } catch (const std::exception& e) {

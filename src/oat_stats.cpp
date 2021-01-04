@@ -228,8 +228,9 @@ int main(int argc, char* argv[]) {
         osmium::apply(reader, stats_handler);
         reader.close();
 
-        vout << "Writing statistics to database...\n";
-        stats_handler.write_stats_to_db("area-stats.db");
+        const std::string database_name{"area-stats.db"};
+        vout << "Writing statistics to database '" << database_name << "'...\n";
+        stats_handler.write_stats_to_db(database_name);
 
         vout << "Done.\n";
 
