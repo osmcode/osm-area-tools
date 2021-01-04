@@ -1,9 +1,9 @@
 #ifndef OAT_HPP
 #define OAT_HPP
 
-#include <osmium/osm/entity_bits.hpp>
-
 #include <string>
+
+#include <osmium/osm/entity_bits.hpp>
 
 enum exit_codes {
     exit_code_ok            = 0,

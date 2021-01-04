@@ -7,11 +7,10 @@
 *****************************************************************************/
 
 #include <cstdlib>
+#include <getopt.h>
 #include <iostream>
 #include <unordered_map>
 #include <utility>
-
-#include <getopt.h>
 
 #include <sqlite.hpp>
 
