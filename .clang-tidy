@@ -1,10 +1,13 @@
 ---
-Checks: '*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-altera-*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-llvmlibc-*,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
 #
 #  For a list of check options, see:
 #  http://clang.llvm.org/extra/clang-tidy/checks/list.html
 #
 #  Disabled checks:
+#
+#  altera-*
+#    Not applicable.
 #
 #  cppcoreguidelines-avoid-c-arrays
 #  hicpp-avoid-c-arrays
@@ -32,6 +35,9 @@ Checks: '*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numb
 #
 #  google-runtime-references
 #    This is just a matter of preference.
+#
+#  llvmlibc-*
+#    Not applicable.
 #
 #  modernize-use-trailing-return-type
 #    I am not quite that modern.
