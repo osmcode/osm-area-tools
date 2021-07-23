@@ -72,6 +72,12 @@ Look at the largest area relations in the input OSM file in terms of the number
 of ways or nodes they contain. Creates a Sqlite database with information about
 those relations and an OSM file containing those relations.
 
+### `oat_mercator`
+
+Assembles areas from their parts, projects them to Mercator (3857) and checks
+them for validity. Can write the areas to a Spatialite database including all
+the problems encountered on the way.
+
 ### `oat_problem_report`
 
 Create areas and report all problems encountered into shapefiles. The areas

@@ -41,6 +41,11 @@ target_link_libraries(oat_large_areas ${OSMIUM_IO_LIBRARIES} sqlite3)
 set_pthread_on_target(oat_large_areas)
 install(TARGETS oat_large_areas DESTINATION bin)
 
+add_executable(oat_mercator oat_mercator.cpp oat.cpp)
+target_link_libraries(oat_mercator ${OSMIUM_LIBRARIES})
+set_pthread_on_target(oat_mercator)
+install(TARGETS oat_mercator DESTINATION bin)
+
 add_executable(oat_problem_report oat_problem_report.cpp oat.cpp)
 target_link_libraries(oat_problem_report ${OSMIUM_LIBRARIES})
 set_pthread_on_target(oat_problem_report)
