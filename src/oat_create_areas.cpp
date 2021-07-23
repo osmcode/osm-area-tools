@@ -62,6 +62,7 @@ class OutputOGR : public osmium::handler::Handler {
 
     bool m_check = false;
     bool m_only_invalid = false;
+    bool m_output_areas = false;
 
     static void print_area_error(const osmium::Area& area, const osmium::geometry_error& e) {
         std::cerr << "Ignoring illegal geometry for area "
@@ -91,6 +92,10 @@ public:
         m_only_invalid = only_invalid;
     }
 
+    void set_output_areas(bool output_areas) noexcept {
+        m_output_areas = output_areas;
+    }
+
     void area(const osmium::Area& area) {
         try {
             bool is_valid = false;
@@ -112,12 +117,14 @@ public:
             if (m_only_invalid && is_valid) {
                 return;
             }
-            gdalcpp::Feature feature{m_layer_multipolygons, std::move(geom)};
-            feature.set_field("id", static_cast<int32_t>(area.id()));
-            feature.set_field("valid", is_valid);
-            feature.set_field("source", area.from_way() ? "w" : "r");
-            feature.set_field("orig_id", static_cast<int32_t>(area.orig_id()));
-            feature.add_to_layer();
+            if (m_output_areas) {
+                gdalcpp::Feature feature{m_layer_multipolygons, std::move(geom)};
+                feature.set_field("id", static_cast<int32_t>(area.id()));
+                feature.set_field("valid", is_valid);
+                feature.set_field("source", area.from_way() ? "w" : "r");
+                feature.set_field("orig_id", static_cast<int32_t>(area.orig_id()));
+                feature.add_to_layer();
+            }
         } catch (const osmium::geometry_error& e) {
             print_area_error(area, e);
         }
@@ -130,6 +137,7 @@ void print_help() {
     std::cout << "oat_create_areas [OPTIONS] OSMFILE\n\n"
               << "Read OSMFILE and build multipolygons from it.\n"
               << "\nOptions:\n"
+              << "  -a, --suppress-area-output   Suppress output of created areas\n"
               << "  -c, --check                  Check geometries\n"
               << "  -C, --collect-only           Only collect data, don't assemble areas\n"
               << "  -f, --only-invalid           Filter out valid geometries\n"
@@ -242,25 +250,26 @@ int main(int argc, char* argv[]) {
         osmium::util::VerboseOutput vout{true};
 
         static const struct option long_options[] = {
-            {"check",           no_argument,       nullptr, 'c'},
-            {"collect-only",    no_argument,       nullptr, 'C'},
-            {"only-invalid",    no_argument,       nullptr, 'f'},
-            {"debug",           optional_argument, nullptr, 'd'},
-            {"dump-areas",      optional_argument, nullptr, 'D'},
-            {"empty-areas",     no_argument,       nullptr, 'e'},
-            {"help",            no_argument,       nullptr, 'h'},
-            {"index",           required_argument, nullptr, 'i'},
-            {"show-index",      no_argument,       nullptr, 'I'},
-            {"output",          required_argument, nullptr, 'o'},
-            {"overwrite",       no_argument,       nullptr, 'O'},
-            {"report-problems", optional_argument, nullptr, 'p'},
-            {"show-incomplete", no_argument,       nullptr, 'r'},
-            {"check-roles",     no_argument,       nullptr, 'R'},
-            {"no-new-style",    no_argument,       nullptr, 's'},
-            {"no-old-style",    no_argument,       nullptr, 'S'},
-            {"keep-type-tag",   no_argument,       nullptr, 't'},
-            {"no-way-polygons", no_argument,       nullptr, 'w'},
-            {"no-areas",        no_argument,       nullptr, 'x'},
+            {"suppress-area-output", no_argument,       nullptr, 'a'},
+            {"check",                no_argument,       nullptr, 'c'},
+            {"collect-only",         no_argument,       nullptr, 'C'},
+            {"only-invalid",         no_argument,       nullptr, 'f'},
+            {"debug",                optional_argument, nullptr, 'd'},
+            {"dump-areas",           optional_argument, nullptr, 'D'},
+            {"empty-areas",          no_argument,       nullptr, 'e'},
+            {"help",                 no_argument,       nullptr, 'h'},
+            {"index",                required_argument, nullptr, 'i'},
+            {"show-index",           no_argument,       nullptr, 'I'},
+            {"output",               required_argument, nullptr, 'o'},
+            {"overwrite",            no_argument,       nullptr, 'O'},
+            {"report-problems",      optional_argument, nullptr, 'p'},
+            {"show-incomplete",      no_argument,       nullptr, 'r'},
+            {"check-roles",          no_argument,       nullptr, 'R'},
+            {"no-new-style",         no_argument,       nullptr, 's'},
+            {"no-old-style",         no_argument,       nullptr, 'S'},
+            {"keep-type-tag",        no_argument,       nullptr, 't'},
+            {"no-way-polygons",      no_argument,       nullptr, 'w'},
+            {"no-areas",             no_argument,       nullptr, 'x'},
             {nullptr, 0, nullptr, 0}
         };
 
@@ -277,17 +286,21 @@ int main(int argc, char* argv[]) {
         bool only_invalid = false;
         bool show_incomplete = false;
         bool overwrite = false;
+        bool output_areas = true;
 
         assembler_type::config_type assembler_config;
         assembler_config.create_empty_areas = false;
 
         while (true) {
-            const int c = getopt_long(argc, argv, "cCd::D::efhi:Io:Op::rRsStwx", long_options, nullptr);
+            const int c = getopt_long(argc, argv, "acCd::D::efhi:Io:Op::rRsStwx", long_options, nullptr);
             if (c == -1) {
                 break;
             }
 
             switch (c) {
+                case 'a':
+                    output_areas = false;
+                    break;
                 case 'c':
                     check = true;
                     break;
@@ -452,6 +465,7 @@ int main(int argc, char* argv[]) {
                 OutputOGR output{dataset, factory};
                 output.set_check(check);
                 output.set_only_invalid(only_invalid);
+                output.set_output_areas(output_areas);
 
                 if (!problem_stream) {
                     reporter = std::make_unique<osmium::area::ProblemReporterOGR>(dataset);
