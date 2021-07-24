@@ -6,11 +6,11 @@
 
 *****************************************************************************/
 
-#include <iostream>
+#include "oat.hpp"
 
 #include <osmium/area/assembler.hpp>
 
-#include "oat.hpp"
+#include <iostream>
 
 int main() {
     std::cout << "sizeof(osmium::area::detail::NodeRefSegment) = " << sizeof(osmium::area::detail::NodeRefSegment) << '\n';

@@ -6,6 +6,15 @@
 
 *****************************************************************************/
 
+#include "oat.hpp"
+
+#include <osmium/handler.hpp>
+#include <osmium/io/any_input.hpp>
+#include <osmium/util/verbose_output.hpp>
+#include <osmium/visitor.hpp>
+
+#include <sqlite.hpp>
+
 #include <array>
 #include <cassert>
 #include <cstdint>
@@ -14,15 +23,6 @@
 #include <iostream>
 #include <unistd.h>
 #include <unordered_map>
-
-#include <sqlite.hpp>
-
-#include <osmium/handler.hpp>
-#include <osmium/io/any_input.hpp>
-#include <osmium/util/verbose_output.hpp>
-#include <osmium/visitor.hpp>
-
-#include "oat.hpp"
 
 class StatsHandler : public osmium::handler::Handler {
 

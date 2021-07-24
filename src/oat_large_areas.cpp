@@ -6,13 +6,7 @@
 
 *****************************************************************************/
 
-#include <cstdlib>
-#include <getopt.h>
-#include <iostream>
-#include <unordered_map>
-#include <utility>
-
-#include <sqlite.hpp>
+#include "oat.hpp"
 
 #include <osmium/handler.hpp>
 #include <osmium/io/any_input.hpp>
@@ -20,7 +14,13 @@
 #include <osmium/util/memory.hpp>
 #include <osmium/visitor.hpp>
 
-#include "oat.hpp"
+#include <sqlite.hpp>
+
+#include <cstdlib>
+#include <getopt.h>
+#include <iostream>
+#include <unordered_map>
+#include <utility>
 
 class LargeAreasHandler : public osmium::handler::Handler {
 

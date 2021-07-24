@@ -6,11 +6,7 @@
 
 *****************************************************************************/
 
-#include <cstdlib>
-#include <fstream>
-#include <getopt.h>
-#include <iostream>
-#include <utility>
+#include "oat.hpp"
 
 #include <osmium/area/multipolygon_manager.hpp>
 #include <osmium/handler.hpp>
@@ -19,7 +15,11 @@
 #include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
-#include "oat.hpp"
+#include <cstdlib>
+#include <fstream>
+#include <getopt.h>
+#include <iostream>
+#include <utility>
 
 static bool count_okay(const std::vector<osmium::object_id_type> &ids) {
     if (ids.size() % 2 != 0) {

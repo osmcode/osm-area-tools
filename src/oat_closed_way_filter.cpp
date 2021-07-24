@@ -6,11 +6,7 @@
 
 *****************************************************************************/
 
-#include <algorithm>
-#include <cstdlib>
-#include <getopt.h>
-#include <iostream>
-#include <string>
+#include "oat.hpp"
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
@@ -19,7 +15,11 @@
 #include <osmium/osm/entity_bits.hpp>
 #include <osmium/osm/way.hpp>
 
-#include "oat.hpp"
+#include <algorithm>
+#include <cstdlib>
+#include <getopt.h>
+#include <iostream>
+#include <string>
 
 static void print_help() {
     std::cout << "oat_closed_way_filter [OPTIONS] OSMFILE -o OUTPUT\n\n"

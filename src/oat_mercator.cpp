@@ -6,11 +6,7 @@
 
 *****************************************************************************/
 
-#include <cstdlib>
-#include <getopt.h>
-#include <iostream>
-
-#include <gdalcpp.hpp>
+#include "oat.hpp"
 
 #include <osmium/area/assembler.hpp>
 #include <osmium/area/multipolygon_manager.hpp>
@@ -30,7 +26,11 @@
 #include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
-#include "oat.hpp"
+#include <gdalcpp.hpp>
+
+#include <cstdlib>
+#include <getopt.h>
+#include <iostream>
 
 using index_type = osmium::index::map::Map<osmium::unsigned_object_id_type, osmium::Location>;
 using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;

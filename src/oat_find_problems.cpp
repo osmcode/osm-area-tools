@@ -6,13 +6,7 @@
 
 *****************************************************************************/
 
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
-#include <getopt.h>
-#include <iostream>
-#include <string>
-#include <vector>
+#include "oat.hpp"
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
@@ -22,7 +16,13 @@
 #include <osmium/osm/relation.hpp>
 #include <osmium/util/memory.hpp>
 
-#include "oat.hpp"
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <getopt.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 static bool check_relation(const osmium::Relation& relation, char mptype, int& error_count) {
     bool okay = true;

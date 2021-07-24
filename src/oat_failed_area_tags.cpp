@@ -6,9 +6,7 @@
 
 *****************************************************************************/
 
-#include <cstdlib>
-#include <getopt.h>
-#include <iostream>
+#include "oat.hpp"
 
 //#define WITH_OLD_STYLE_MP_SUPPORT
 
@@ -36,7 +34,9 @@
 #include <osmium/util/verbose_output.hpp>
 #include <osmium/visitor.hpp>
 
-#include "oat.hpp"
+#include <cstdlib>
+#include <getopt.h>
+#include <iostream>
 
 using index_type = osmium::index::map::Map<osmium::unsigned_object_id_type, osmium::Location>;
 using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;

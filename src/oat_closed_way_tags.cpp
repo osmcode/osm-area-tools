@@ -6,14 +6,7 @@
 
 *****************************************************************************/
 
-#include <algorithm>
-#include <array>
-#include <cstdlib>
-#include <cstring>
-#include <getopt.h>
-#include <iostream>
-#include <memory>
-#include <string>
+#include "oat.hpp"
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
@@ -25,7 +18,14 @@
 #include <osmium/tags/filter.hpp>
 #include <osmium/tags/taglist.hpp>
 
-#include "oat.hpp"
+#include <algorithm>
+#include <array>
+#include <cstdlib>
+#include <cstring>
+#include <getopt.h>
+#include <iostream>
+#include <memory>
+#include <string>
 
 static void print_help() {
     std::cout << "oat_closed_way_tags [OPTIONS] OSMFILE\n\n"
