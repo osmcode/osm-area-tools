@@ -5,10 +5,10 @@ runs:
   steps:
     - name: Install packages
       run: |
-        sudo apt-get update -q
+        sudo apt-get update -qq
         sudo apt-get install -yq \
-            libboost-dev \
-            libgdal-dev \
-            libgeos++-dev
+             libboost-dev \
+             libgdal-dev \
+             libgeos++-dev
       shell: bash
 

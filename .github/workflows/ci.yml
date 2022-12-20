@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [Ubuntu-18, Ubuntu-20, Ubuntu-21, Debian-9, Debian-10, Debian-11, Debian-Testing, Debian-Experimental, Fedora-34]
+        name: [Ubuntu-18, Ubuntu-20, Ubuntu-22, Debian-9, Debian-10, Debian-11, Debian-Testing, Debian-Experimental, Fedora-35, Fedora-36]
         build_type: [Dev]
         cpp_compiler: [g++]
         cpp_version: [c++11]
@@ -24,9 +24,9 @@ jobs:
             image: "ubuntu:20.04"
             ubuntu: 20
             installer: apt
-          - name: Ubuntu-21
-            # Uses gcc 10.3.0, clang, 12.0.0, cmake 3.18.4
-            image: "ubuntu:21.04"
+          - name: Ubuntu-22
+            # Uses gcc 11.2.0, clang 14.0.0, cmake 3.22.1
+            image: "ubuntu:22.04"
             ubuntu: 21
             installer: apt
           - name: Debian-9
@@ -98,14 +98,14 @@ jobs:
             installer: apt
             c_compiler: clang-14
             cpp_compiler: clang++-14
-          - name: Fedora-34
-            # Uses gcc 11.2.1, clang 12.0.1, cmake 3.20.5
-            image: "fedora:34"
-            installer: dnf
-            CXXFLAGS: -Wno-stringop-overread
           - name: Fedora-35
             # Uses gcc 11.2.1, clang 12.0.1, cmake 3.20.5
             image: "fedora:35"
+            installer: dnf
+            CXXFLAGS: -Wno-stringop-overread
+          - name: Fedora-36
+            # Uses gcc 12.2.0, clang 14.0.5, cmake 3.24.2
+            image: "fedora:36"
             installer: dnf
             CXXFLAGS: -Wno-stringop-overread
     container:
@@ -113,10 +113,10 @@ jobs:
       env:
         LANG: en_US.UTF-8
         BUILD_TYPE: ${{ matrix.build_type }}
-        CXXFLAGS: ${{ matrix.CXXFLAGS }}
-        LDFLAGS: ${{ matrix.LDFLAGS }}
         CC: ${{ matrix.c_compiler }}
         CXX: ${{ matrix.cpp_compiler }}
+        CXXFLAGS: ${{ matrix.CXXFLAGS }}
+        LDFLAGS: ${{ matrix.LDFLAGS }}
         CPP_VERSION: ${{ matrix.cpp_version }}
         APT_LISTCHANGES_FRONTEND: none
         DEBIAN_FRONTEND: noninteractive
@@ -124,7 +124,7 @@ jobs:
       - name: Prepare container (apt)
         run: |
           apt-get update -qq
-          apt-get install -y \
+          apt-get install -yq \
             clang \
             cmake \
             g++ \
@@ -161,64 +161,52 @@ jobs:
               zlib-devel
         shell: bash
         if: matrix.installer == 'dnf'
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
 
   ubuntu-latest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
-      CC: clang-13
-      CXX: clang++-13
+      CC: clang-15
+      CXX: clang++-15
       BUILD_TYPE: Dev
     steps:
       - name: Install new clang
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main'
-          sudo apt-get install clang-13
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/llvm-snapshot.asc
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main'
+          sudo apt-get update -qq
+          sudo apt-get install -yq clang-15
         shell: bash
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-ubuntu
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
 
-  macos10-dev:
-    runs-on: macos-10.15
-    env:
-      CC: clang
-      CXX: clang++
-      BUILD_TYPE: Dev
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/actions/install-macos
-      - uses: ./.github/actions/install-from-git
-      - uses: ./.github/actions/cmake
-      - uses: ./.github/actions/build
-
   macos11-dev:
-    runs-on: macos-11.0
+    runs-on: macos-11
     env:
       CC: clang
       CXX: clang++
       BUILD_TYPE: Dev
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-macos
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
       - uses: ./.github/actions/build
 
   macos11-release:
-    runs-on: macos-11.0
+    runs-on: macos-11
     env:
       CC: clang
       CXX: clang++
       BUILD_TYPE: Release
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/install-macos
       - uses: ./.github/actions/install-from-git
       - uses: ./.github/actions/cmake
