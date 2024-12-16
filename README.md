@@ -97,8 +97,7 @@ up the areas. The results are stored in an Sqlite database.
 
 ## Prerequisites
 
-You need a C++11 compliant compiler. GCC 4.8 and later as well as clang 3.4 and
-later are known to work. You also need the following libraries:
+You need a C++14 compliant compiler. You also need the following libraries:
 
     Osmium Library
         Need at least version 2.15.4
@@ -161,7 +160,7 @@ defaults is RelWithDebInfo.
 
 ## License
 
-Copyright (C) 2016-2021  Jochen Topf <jochen@topf.org>
+Copyright (C) 2016-2024  Jochen Topf <jochen@topf.org>
 
 This program is available under the GNU GENERAL PUBLIC LICENSE Version 3.
 See the file LICENSE.txt for the complete text of the license.
@@ -170,5 +169,4 @@ See the file LICENSE.txt for the complete text of the license.
 ## Authors
 
 This program was written and is maintained by Jochen Topf <jochen@topf.org>.
-
 

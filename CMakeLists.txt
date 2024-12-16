@@ -6,7 +6,7 @@
 #
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 project(osmium-area VERSION 0.0.1)
@@ -120,7 +120,7 @@ if(CPPCHECK)
 
     add_custom_target(cppcheck
         ${CPPCHECK}
-        --std=c++11 ${CPPCHECK_OPTIONS}
+        --std=c++14 ${CPPCHECK_OPTIONS}
         ${CPPCHECK_FILES}
     )
 else()
