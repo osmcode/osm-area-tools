@@ -10,4 +10,3 @@ runs:
           gdal \
           geos
       shell: bash
-

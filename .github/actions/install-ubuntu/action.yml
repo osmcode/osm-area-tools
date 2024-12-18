@@ -12,4 +12,3 @@ runs:
              libgdal-dev \
              libgeos++-dev
       shell: bash
-
