@@ -22,7 +22,7 @@ jobs:
           - "fedora:43"
         build_type: [Dev]
         cpp_compiler: [g++]
-        cpp_version: [c++14]
+        cpp_version: [c++17]
         include:
           - image: "ubuntu:22.04"
             CXXFLAGS: -Wno-stringop-overread -Wno-array-bounds
@@ -95,7 +95,6 @@ jobs:
             cmake \
             g++ \
             git \
-            libboost-dev \
             libbz2-dev \
             libexpat1-dev \
             libgdal-dev \
@@ -109,7 +108,6 @@ jobs:
         if: startsWith(matrix.image, 'fedora:')
         run: |
           dnf install --quiet --assumeyes \
-            boost-devel \
             bzip2-devel \
             cmake \
             expat-devel \
