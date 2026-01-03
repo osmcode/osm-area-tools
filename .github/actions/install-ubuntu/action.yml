@@ -7,7 +7,6 @@ runs:
       run: |
         sudo apt-get update -qq
         sudo apt-get install -yq \
-             libboost-dev \
              libbz2-dev \
              libgdal-dev \
              libgeos++-dev
