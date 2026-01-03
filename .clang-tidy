@@ -1,5 +1,5 @@
 ---
-Checks: '*,-altera-*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-llvmlibc-*,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-altera-*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-avoid-c-arrays,-hicpp-no-array-decay,-llvmlibc-*,-misc-include-cleaner,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type,-readability-implicit-bool-conversion,-readability-magic-numbers'
 #
 #  For a list of check options, see:
 #  http://clang.llvm.org/extra/clang-tidy/checks/list.html
@@ -38,6 +38,9 @@ Checks: '*,-altera-*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-
 #
 #  llvmlibc-*
 #    Not applicable.
+#
+#  misc-include-cleaner
+#    Too many reports. Disabled for now.
 #
 #  modernize-use-trailing-return-type
 #    I am not quite that modern.
