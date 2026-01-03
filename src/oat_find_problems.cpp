@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
         const osmium::io::File output_file{output, output_format};
         osmium::io::Writer writer{output_file};
 
-        osmium::io::File input_file{argv[optind]};
+        const osmium::io::File input_file{argv[optind]};
         osmium::io::Reader reader{input_file, osmium::osm_entity_bits::relation};
 
         while (const osmium::memory::Buffer buffer = reader.read()) {
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
         return exit_code_error;
     }
 
-    osmium::MemoryUsage mcheck;
+    const osmium::MemoryUsage mcheck;
     if (mcheck.peak()) {
         std::cerr << "Peak memory usage: " << mcheck.peak() << "MB\n";
     }

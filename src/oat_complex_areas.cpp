@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
         };
 
         while (true) {
-            int c = getopt_long(argc, argv, "hc:s:", long_options, nullptr);
+            const int c = getopt_long(argc, argv, "hc:s:", long_options, nullptr);
             if (c == -1) {
                 break;
             }
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]) {
         reader.close();
         vout << "Second pass done.\n";
 
-        osmium::MemoryUsage mcheck;
+        const osmium::MemoryUsage mcheck;
         vout << "Actual memory usage:\n";
         vout << "  current: " << mcheck.current() << "MB\n";
         vout << "  peak:    " << mcheck.peak() << "MB\n";

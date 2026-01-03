@@ -83,8 +83,8 @@ public:
             return category::notags;
         }
 
-        osmium::tags::KeyFilter::iterator fi_begin(m_uninteresting_tags, tags.cbegin(), tags.cend());
-        osmium::tags::KeyFilter::iterator fi_end(m_uninteresting_tags, tags.cend(), tags.cend());
+        const osmium::tags::KeyFilter::iterator fi_begin(m_uninteresting_tags, tags.cbegin(), tags.cend());
+        const osmium::tags::KeyFilter::iterator fi_end(m_uninteresting_tags, tags.cend(), tags.cend());
         if (std::distance(fi_begin, fi_end) == 0) {
             return category::notags;
         }
@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
             return exit_code_cmdline_error;
         }
 
-        Classifier classifier;
+        const Classifier classifier;
 
         const osmium::io::File infile{argv[optind]};
 

@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
         std::size_t min_nodes = 100000;
         std::string output{"large_areas"};
         while (true) {
-            int c = getopt_long(argc, argv, "hn:o:w:", long_options, nullptr);
+            const int c = getopt_long(argc, argv, "hn:o:w:", long_options, nullptr);
             if (c == -1) {
                 break;
             }
@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
         return exit_code_error;
     }
 
-    osmium::MemoryUsage mcheck;
+    const osmium::MemoryUsage mcheck;
     std::cerr << "Actual memory usage:\n"
               << "  current: " << mcheck.current() << "MB\n"
               << "  peak:    " << mcheck.peak() << "MB\n";

@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
             {nullptr, 0, nullptr, 0}
         };
 
-        std::string database_name{"area_problems"};
+        const std::string database_name{"area_problems"};
 
         std::string location_index_type{"flex_mem"};
         const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
         assembler_type::config_type assembler_config;
         assembler_config.check_roles = true;
 
-        osmium::geom::OGRFactory<> factory;
+        const osmium::geom::OGRFactory<> factory;
 
         gdalcpp::Dataset dataset{"ESRI Shapefile", database_name, gdalcpp::SRS{factory.proj_string()}};
         osmium::area::ProblemReporterOGR problem_reporter{dataset};
@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
         vout << "Estimated memory usage:\n";
         vout << "  location index: " << (location_index->used_memory() / (1024 * 1024)) << "MB\n";
 
-        osmium::MemoryUsage mcheck;
+        const osmium::MemoryUsage mcheck;
         vout << "Actual memory usage:\n"
             << "  current: " << mcheck.current() << "MB\n"
             << "  peak:    " << mcheck.peak() << "MB\n";

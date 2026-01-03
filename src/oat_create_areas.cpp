@@ -389,7 +389,7 @@ int main(int argc, char* argv[]) {
         const bool need_locations = location_index_type != "none";
 
         if (collect_only) {
-            DummyAssembler::config_type config;
+            const DummyAssembler::config_type config;
             mp_manager_only mp_manager{config};
 
             vout << "Starting first pass (reading relations)...\n";
@@ -526,7 +526,7 @@ int main(int argc, char* argv[]) {
         vout << "Estimated memory usage:\n";
         vout << "  location index: " << (location_index->used_memory() / 1024) << "kB\n";
 
-        osmium::MemoryUsage mcheck;
+        const osmium::MemoryUsage mcheck;
         vout << "Actual memory usage:\n"
             << "  current: " << mcheck.current() << "MB\n"
             << "  peak:    " << mcheck.peak() << "MB\n";

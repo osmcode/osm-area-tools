@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
         vout << "Estimated memory usage:\n";
         vout << "  location index: " << (location_index->used_memory() / 1024) << "kB\n";
 
-        osmium::MemoryUsage mcheck;
+        const osmium::MemoryUsage mcheck;
         vout << "Actual memory usage:\n"
             << "  current: " << mcheck.current() << "MB\n"
             << "  peak:    " << mcheck.peak() << "MB\n";
